@@ -1,0 +1,9 @@
+{
+  "name": "Fifth Block CMS",
+  "description": "A comprehensive Complaint Management System for the Fifth Block in Aleppo, featuring multi-language support, role-based dashboards, and secure complaint tracking.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
