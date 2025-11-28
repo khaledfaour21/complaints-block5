@@ -34,7 +34,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   useEffect(() => {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
-    document.body.style.fontFamily = lang === 'ar' ? 'Cairo, sans-serif' : 'Inter, sans-serif';
+    document.body.style.fontFamily = 'itfQomraArabic, sans-serif';
   }, [lang]);
 
   const handleLogout = () => {
@@ -43,6 +43,51 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   const isActive = (path: string) => location.pathname === path ? 'text-brand-accent font-bold' : '';
+
+  // Role-based navigation items
+  const getNavigationItems = (): Array<{path: string, label: string, highlight?: boolean}> => {
+    const publicItems = [
+      { path: '/', label: t('nav.home') },
+      { path: '/submit', label: t('home.submit_card') },
+      { path: '/track', label: t('nav.track') },
+      { path: '/achievements', label: t('nav.achievements') },
+      { path: '/announcements', label: t('nav.announcements') },
+    ];
+
+    if (!user) return publicItems;
+
+    const userItems: Array<{path: string, label: string, highlight?: boolean}> = [...publicItems];
+
+    // Dashboard access based on role hierarchy
+    if (user.role === 'MANAGER') {
+      // Manager can access all dashboards
+      userItems.push(
+        { path: '/dashboard/muktar', label: 'Mukhtar Dashboard', highlight: true },
+        { path: '/dashboard/admin', label: 'Admin Dashboard', highlight: true },
+        { path: '/dashboard/manager', label: 'Manager Dashboard', highlight: true }
+      );
+    } else if (user.role === 'ADMIN') {
+      // Admin can access Admin and Mukhtar dashboards
+      userItems.push(
+        { path: '/dashboard/muktar', label: 'Mukhtar Dashboard', highlight: true },
+        { path: '/dashboard/admin', label: 'Admin Dashboard', highlight: true }
+      );
+    } else if (user.role === 'MUKTAR') {
+      // Muktar can only access Mukhtar dashboard
+      userItems.push(
+        { path: '/dashboard/muktar', label: 'Mukhtar Dashboard', highlight: true }
+      );
+    }
+
+    // Content management for Admin & Manager only
+    if (user.role === 'ADMIN' || user.role === 'MANAGER') {
+      userItems.push(
+        { path: '/content', label: 'Ads & Achievements', highlight: true }
+      );
+    }
+
+    return userItems;
+  };
 
   return (
     <div className="drawer min-h-screen bg-brand-lightBg dark:bg-brand-darkBg text-brand-secondary dark:text-brand-lightBg">
@@ -60,18 +105,25 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
           <div className="flex-1 px-2 mx-2">
              <Link to="/" className="flex items-center gap-2 group">
-                <div className="w-8 h-8 bg-brand-accent rounded-lg flex items-center justify-center font-bold text-brand-secondary group-hover:rotate-12 transition-transform">5</div>
+                <img src="/logo.ai.svg" alt="Logo" className="w-8 h-8 group-hover:rotate-12 transition-transform" />
                 <span className="text-lg font-bold font-cairo">Fifth Block</span>
              </Link>
           </div>
           <div className="flex-none hidden lg:block">
             <ul className="menu menu-horizontal px-1 font-semibold gap-2">
-              <li><Link to="/" className={isActive('/')}>{t('nav.home')}</Link></li>
-              <li><Link to="/submit" className={isActive('/submit')}>{t('home.submit_card')}</Link></li>
-              <li><Link to="/track" className={isActive('/track')}>{t('nav.track')}</Link></li>
-              <li><Link to="/achievements" className={isActive('/achievements')}>{t('nav.achievements')}</Link></li>
-              <li><Link to="/announcements" className={isActive('/announcements')}>{t('nav.announcements')}</Link></li>
-              {user && <li><Link to="/dashboard" className="bg-brand-accent/20 text-brand-accent border border-brand-accent/50 hover:bg-brand-accent/30">{t('nav.dashboard')}</Link></li>}
+              {getNavigationItems().map((item) => (
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
+                    className={item.highlight
+                      ? "bg-brand-accent/20 text-brand-accent border border-brand-accent/50 hover:bg-brand-accent/30"
+                      : isActive(item.path)
+                    }
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <div className="flex-none gap-2">
@@ -96,7 +148,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                         </div>
                     </div>
                     <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-base-100 rounded-box w-52 text-brand-secondary border border-gray-100">
-                        <li><Link to="/dashboard">Dashboard</Link></li>
+                        {user.role !== 'CITIZEN' && <li><Link to="/dashboard">Dashboard</Link></li>}
                         <li><Link to="/profile">Profile</Link></li>
                         <li><Link to="/settings">Settings</Link></li>
                         <li onClick={handleLogout}><a className="text-error">Logout</a></li>

@@ -1,4 +1,3 @@
-
 export enum Role {
   CITIZEN = 'CITIZEN',
   MUKTAR = 'MUKTAR',
@@ -12,11 +11,20 @@ export enum Urgency {
   CRITICAL = 'Critical',
 }
 
+export enum Importance {
+  HIGH = 'High Importance',
+  MEDIUM = 'Medium Importance',
+  LOW = 'Low Importance',
+}
+
 export enum ComplaintStatus {
   UNREAD = 'Unread',
+  PENDING = 'Pending',
+  UNDER_REVIEW = 'Under Review',
   IN_PROGRESS = 'In Progress',
   COMPLETED = 'Completed',
   REJECTED = 'Rejected',
+  CLOSED = 'Closed',
 }
 
 export interface User {
@@ -33,8 +41,9 @@ export interface Complaint {
   id: string;
   trackingNumber: string;
   district: string;
+  location: string;
   category: string;
-  urgency: Urgency;
+  importance: Importance;
   title: string;
   description: string;
   notes?: string;
@@ -47,6 +56,9 @@ export interface Complaint {
   attachments: string[]; // URLs
   muktarNotes?: string;
   assignedMuktarId?: string;
+  assignedAdminId?: string;
+  assignedManagerId?: string;
+  pinned?: boolean;
 }
 
 export interface Achievement {
@@ -54,7 +66,10 @@ export interface Achievement {
   title: string;
   description: string;
   date: string;
-  images: string[];
+  media: Array<{
+    url: string;
+    type: 'image' | 'video';
+  }>;
 }
 
 export interface Announcement {
@@ -98,6 +113,6 @@ export interface MuktarStats {
 export interface FilterState {
   district: string;
   status: string;
-  urgency: string;
+  importance: string;
   search: string;
 }

@@ -36,15 +36,16 @@ export const Login: React.FC = () => {
         return;
       }
 
-      login({
+      const user = {
         id: '123',
         name,
         email: data.email,
         role,
         district: role === Role.MUKTAR ? 'District 1' : undefined
-      });
+      };
       
-      navigate('/dashboard');
+      login(user);
+      navigate('/dashboard-select');
     }, 1000);
   };
 
@@ -101,12 +102,47 @@ export const Login: React.FC = () => {
               </button>
             </div>
           </form>
-          
+
+          <div className="divider">OR</div>
+          <div className="form-control">
+            <button
+              onClick={() => {
+                login({
+                  id: 'demo',
+                  name: 'Demo Manager',
+                  email: 'demo@fifthblock.sy',
+                  role: Role.MANAGER
+                });
+                navigate('/dashboard-select');
+              }}
+              className="btn btn-outline text-lg mb-2"
+              style={{ borderColor: '#7c3aed', color: '#7c3aed' }}
+            >
+              Demo Manager Login
+            </button>
+            <button
+              onClick={() => {
+                login({
+                  id: 'demo-admin',
+                  name: 'Demo Admin',
+                  email: 'demo-admin@fifthblock.sy',
+                  role: Role.ADMIN
+                });
+                navigate('/dashboard-select');
+              }}
+              className="btn btn-outline text-lg"
+              style={{ borderColor: '#428177', color: '#428177' }}
+            >
+              Demo Admin Login
+            </button>
+          </div>
+
           <div className="divider">DEMO HINT</div>
           <div className="text-xs text-center text-gray-400 space-y-1">
             <p>Manager: manager@test.com</p>
             <p>Admin: admin@test.com</p>
             <p>Muktar: muktar@test.com</p>
+            <p>Citizen: Use Demo Login above</p>
           </div>
         </div>
       </div>

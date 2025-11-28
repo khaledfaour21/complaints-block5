@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Home } from './components/Home';
 import { Login } from './components/Login';
 import { Dashboard } from './components/Dashboard';
+import { DashboardSelect } from './components/DashboardSelect';
 import { Tracking } from './components/Tracking';
 import { SubmitComplaintEnhanced } from './components/submit/SubmitComplaintEnhanced';
 import { SubmitSuccess } from './components/submit/SubmitSuccess';
@@ -23,8 +24,10 @@ import { NotFound } from './components/errors/NotFound';
 import { ErrorBoundary } from './components/errors/ErrorBoundary';
 import { OfflinePage } from './components/pwa/OfflinePage';
 import { ProtectedRoute } from './components/shared/ProtectedRoute';
+import { UnifiedContentManagement } from './components/shared/UnifiedContentManagement';
 import { Role } from './types';
 import { useLangStore } from './store';
+import { ComplaintsDataProvider } from './context/ComplaintsDataContext';
 
 const App: React.FC = () => {
   const { lang } = useLangStore();
@@ -37,53 +40,56 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <Router>
+      <ComplaintsDataProvider>
         <Layout>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/submit" element={<SubmitComplaintEnhanced />} />
-            <Route path="/submit/success" element={<SubmitSuccess />} />
-            <Route path="/track" element={<Tracking />} />
-            <Route path="/achievements" element={<PublicAchievements />} />
-            <Route path="/announcements" element={<PublicAnnouncements />} />
-            <Route path="/offline" element={<OfflinePage />} />
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/submit" element={<SubmitComplaintEnhanced />} />
+              <Route path="/submit/success" element={<SubmitSuccess />} />
+              <Route path="/track" element={<Tracking />} />
+              <Route path="/achievements" element={<PublicAchievements />} />
+              <Route path="/announcements" element={<PublicAnnouncements />} />
+              <Route path="/offline" element={<OfflinePage />} />
 
-            {/* Protected Routes - General User */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/change-password" element={<ChangePassword />} />
-              <Route path="/notifications" element={<NotificationsCenter />} />
-            </Route>
+              {/* Dashboard Selection */}
+              <Route path="/dashboard-select" element={<DashboardSelect />} />
 
-            {/* Role Specific Routes */}
-            <Route element={<ProtectedRoute allowedRoles={[Role.ADMIN]} />}>
-              <Route path="/dashboard/admin" element={<AdminDashboard />} />
-            </Route>
+              {/* Protected Routes - General User */}
+              {/* <Route element={<ProtectedRoute />}> */}
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/change-password" element={<ChangePassword />} />
+                <Route path="/notifications" element={<NotificationsCenter />} />
+              {/* </Route> */}
 
-            <Route element={<ProtectedRoute allowedRoles={[Role.MUKTAR]} />}>
-              <Route path="/dashboard/muktar" element={<MuktarDashboard />} />
-            </Route>
+              {/* Role Specific Routes */}
+              {/* <Route element={<ProtectedRoute allowedRoles={[Role.ADMIN]} />}> */}
+                <Route path="/dashboard/admin" element={<AdminDashboard />} />
+              {/* </Route> */}
 
-            <Route element={<ProtectedRoute allowedRoles={[Role.MANAGER]} />}>
-              <Route path="/dashboard/manager" element={<ManagerDashboard />} />
-              <Route path="/dashboard/muktar/:id" element={<MuktarDetails />} />
-            </Route>
+              {/* <Route element={<ProtectedRoute allowedRoles={[Role.MUKTAR]} />}> */}
+                <Route path="/dashboard/muktar" element={<MuktarDashboard />} />
+              {/* </Route> */}
 
-            <Route element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.MANAGER]} />}>
-              <Route path="/achievements/admin" element={<AchievementsAdminPanel />} />
-              <Route path="/announcements/admin" element={<AnnouncementsAdminPanel />} />
-            </Route>
+              {/* <Route element={<ProtectedRoute allowedRoles={[Role.MANAGER]} />}> */}
+                <Route path="/dashboard/manager" element={<ManagerDashboard />} />
+                <Route path="/dashboard/muktar/:id" element={<MuktarDetails />} />
+              {/* </Route> */}
 
-            {/* Errors */}
-            <Route path="/404" element={<NotFound />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
-      </Router>
+              {/* <Route element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.MANAGER]} />}> */}
+                <Route path="/achievements/admin" element={<AchievementsAdminPanel />} />
+                <Route path="/announcements/admin" element={<AnnouncementsAdminPanel />} />
+                <Route path="/content" element={<UnifiedContentManagement />} />
+              {/* </Route> */}
+
+              {/* Errors */}
+              <Route path="/404" element={<NotFound />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+      </ComplaintsDataProvider>
     </ErrorBoundary>
   );
 };

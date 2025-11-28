@@ -7,7 +7,6 @@ import { Urgency } from '../../types';
 import { useLangStore } from '../../store';
 import { api } from '../../services/api';
 import { PhotoIcon, CheckCircleIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
-import { FormSkeleton } from '../shared/LoadingStates';
 
 // Simulating image compression
 const compressImage = async (file: File): Promise<File> => {
@@ -19,6 +18,7 @@ const compressImage = async (file: File): Promise<File> => {
 
 const schema = z.object({
   district: z.string().min(1, "District is required"),
+  location: z.string().min(3, "Location is required"),
   category: z.string().min(1, "Category is required"),
   urgency: z.nativeEnum(Urgency),
   title: z.string().min(3, "Title is too short"),
@@ -27,9 +27,41 @@ const schema = z.object({
   canHelp: z.boolean(),
   helpDescription: z.string().optional(),
 }).refine((data) => !data.canHelp || (data.canHelp && data.helpDescription && data.helpDescription.length > 0), {
-    message: "Please describe how you can help",
-    path: ["helpDescription"]
+  message: "Please describe how you can help",
+  path: ["helpDescription"]
 });
+
+const getCooldownData = (phone: string) => {
+const key = `lastComplaint_${phone}`;
+const data = localStorage.getItem(key);
+if (data) {
+  return JSON.parse(data);
+}
+return null;
+};
+
+const setCooldownData = (phone: string, timestamp: number) => {
+const key = `lastComplaint_${phone}`;
+localStorage.setItem(key, JSON.stringify({ phone, timestamp }));
+};
+
+const isCooldownActive = (phone: string) => {
+const data = getCooldownData(phone);
+if (!data) return false;
+const now = Date.now();
+const elapsed = now - data.timestamp;
+const cooldownMs = 24 * 60 * 60 * 1000;
+return elapsed < cooldownMs;
+};
+
+const getRemainingTime = (phone: string) => {
+const data = getCooldownData(phone);
+if (!data) return 0;
+const now = Date.now();
+const elapsed = now - data.timestamp;
+const cooldownMs = 24 * 60 * 60 * 1000;
+return Math.max(0, cooldownMs - elapsed);
+};
 
 type FormData = z.infer<typeof schema>;
 
@@ -37,7 +69,7 @@ export const SubmitComplaintEnhanced: React.FC = () => {
   const { t } = useLangStore();
   const [submittedId, setSubmittedId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [assignedMuktar, setAssignedMuktar] = useState<string | null>(null);
+  const [assignedPerson, setAssignedPerson] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
 
@@ -48,19 +80,86 @@ export const SubmitComplaintEnhanced: React.FC = () => {
 
   const district = watch('district');
   const canHelp = watch('canHelp');
+  const phoneNumber = watch('phoneNumber');
+  const urgency = watch('urgency');
 
-  // Auto-assign Muktar based on district
+  const [cooldownMessage, setCooldownMessage] = useState<string | null>(null);
+  const [submittedPhone, setSubmittedPhone] = useState<string>('');
+  const [successCountdown, setSuccessCountdown] = useState<string>('');
+
+  // Auto-assign based on urgency
   useEffect(() => {
-      if (district) {
-          // Mock logic: fetch muktar for this district
+      if (urgency === Urgency.NORMAL && district) {
+          // Assign to Muktar for low importance
           api.getMuktars().then(muktars => {
               const match = muktars.find(m => m.district === district);
-              setAssignedMuktar(match ? match.name : 'General Office');
+              setAssignedPerson(match ? match.name : 'General Office');
+          });
+      } else if (urgency === Urgency.URGENT) {
+          // Assign to Admin for medium importance
+          api.getAdmins().then(admins => {
+              setAssignedPerson(admins[0]?.name || 'Admin Office');
+          });
+      } else if (urgency === Urgency.CRITICAL) {
+          // Assign to Manager for high importance
+          api.getManagers().then(managers => {
+              setAssignedPerson(managers[0]?.name || 'Manager Office');
           });
       } else {
-          setAssignedMuktar(null);
+          setAssignedPerson(null);
       }
-  }, [district]);
+  }, [urgency, district]);
+
+  // Check cooldown when phone number changes
+  useEffect(() => {
+    if (phoneNumber && isCooldownActive(phoneNumber)) {
+      const remaining = getRemainingTime(phoneNumber);
+      const hours = Math.floor(remaining / (1000 * 60 * 60));
+      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+      const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      setCooldownMessage(`عذراً لا يمكنك تقديم شكوى حالياً. يمكنك المحاولة بعد: ${timeStr}`);
+    } else {
+      setCooldownMessage(null);
+    }
+  }, [phoneNumber]);
+
+  // Update cooldown message countdown
+  useEffect(() => {
+    if (!cooldownMessage) return;
+    const interval = setInterval(() => {
+      if (phoneNumber && isCooldownActive(phoneNumber)) {
+        const remaining = getRemainingTime(phoneNumber);
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+        const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        setCooldownMessage(`عذراً لا يمكنك تقديم شكوى حالياً. يمكنك المحاولة بعد: ${timeStr}`);
+      } else {
+        setCooldownMessage(null);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [cooldownMessage, phoneNumber]);
+
+  // Success screen countdown
+  useEffect(() => {
+    if (!submittedId || !submittedPhone) return;
+    const updateCountdown = () => {
+      const remaining = getRemainingTime(submittedPhone);
+      if (remaining <= 0) {
+        setSuccessCountdown('');
+        return;
+      }
+      const hours = Math.floor(remaining / (1000 * 60 * 60));
+      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+      setSuccessCountdown(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    };
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [submittedId, submittedPhone]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files) {
@@ -73,12 +172,24 @@ export const SubmitComplaintEnhanced: React.FC = () => {
   };
 
   const onSubmit = async (data: FormData) => {
+    const phone = data.phoneNumber;
+    if (isCooldownActive(phone)) {
+      const remaining = getRemainingTime(phone);
+      const hours = Math.floor(remaining / (1000 * 60 * 60));
+      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+      const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      setCooldownMessage(`عذراً لا يمكنك تقديم شكوى حالياً. يمكنك المحاولة بعد: ${timeStr}`);
+      return;
+    }
     setIsSubmitting(true);
     try {
         // 1. Upload files (Mock)
         // 2. Submit data to API
         const trackId = await api.submitComplaint({ ...data, files });
         setSubmittedId(trackId);
+        setCooldownData(phone, Date.now());
+        setSubmittedPhone(phone);
     } catch (error) {
         console.error(error);
     } finally {
@@ -95,13 +206,17 @@ export const SubmitComplaintEnhanced: React.FC = () => {
                 <CheckCircleIcon className="w-12 h-12" />
             </div>
             <h2 className="text-3xl font-cairo font-bold text-brand-primary mb-2">{t('form.success')}</h2>
-            <p className="text-gray-500 mb-6">Your complaint has been registered and forwarded to <span className="font-bold text-brand-secondary">{assignedMuktar}</span>.</p>
+            <p className="text-gray-500 mb-6">Your complaint has been registered and forwarded to <span className="font-bold text-brand-secondary">{assignedPerson}</span>.</p>
             
             <div className="bg-brand-lightBg p-6 rounded-xl border border-dashed border-brand-primary/30 w-full max-w-md">
               <p className="text-sm uppercase tracking-widest text-gray-500 mb-2">{t('form.tracking')}</p>
               <div className="text-5xl font-mono font-bold text-brand-primary">{submittedId}</div>
             </div>
-            
+
+            {successCountdown && (
+              <p className="text-gray-500 mt-4">يمكنك تقديم شكوى أخرى بعد: {successCountdown}</p>
+            )}
+
             <div className="mt-8 flex gap-4 flex-wrap justify-center">
                 <button onClick={() => window.location.reload()} className="btn btn-ghost">Submit Another</button>
                 <button onClick={() => window.location.hash = '#/track'} className="btn btn-primary text-white px-8">
@@ -126,47 +241,62 @@ export const SubmitComplaintEnhanced: React.FC = () => {
          </div>
       </div>
 
+      {cooldownMessage && (
+        <div className="alert alert-error mb-4">
+          {cooldownMessage}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="form-control w-full">
-            <label className="label"><span className="label-text font-bold text-lg">{t('form.district')}</span></label>
-            <select {...register('district')} className="select select-bordered select-lg w-full bg-brand-lightBg dark:bg-[#2a2a2a]">
-              <option value="">Select District</option>
-              <option value="District 1">Al-Zahra (District 1)</option>
-              <option value="District 2">Al-Mogambo (District 2)</option>
-              <option value="District 3">Al-Furqan (District 3)</option>
-            </select>
-            {assignedMuktar && <div className="text-xs mt-2 text-brand-primary flex items-center gap-1"><CheckCircleIcon className="w-3 h-3"/> Routing to: {assignedMuktar}</div>}
-            {errors.district && <span className="text-error text-sm mt-1">{errors.district.message}</span>}
-          </div>
-
-          <div className="form-control w-full">
-            <label className="label"><span className="label-text font-bold text-lg">{t('form.category')}</span></label>
-            <select {...register('category')} className="select select-bordered select-lg w-full bg-brand-lightBg dark:bg-[#2a2a2a]">
-              <option value="">Select Category</option>
-              <option value="Electricity">Electricity</option>
-              <option value="Water">Water</option>
-              <option value="Roads">Roads</option>
-              <option value="Sanitation">Sanitation</option>
-              <option value="Security">Security</option>
-              <option value="Other">Other</option>
-            </select>
-            {errors.category && <span className="text-error text-sm mt-1">{errors.category.message}</span>}
-          </div>
-        </div>
-
-        <div className="form-control">
-           <label className="label"><span className="label-text font-bold text-lg">{t('form.urgency')}</span></label>
-           <div className="flex gap-4 flex-wrap">
-              {Object.values(Urgency).map((u) => (
-                <label key={u} className={`flex-1 cursor-pointer flex items-center justify-center gap-2 border p-4 rounded-xl transition-all ${u === Urgency.CRITICAL ? 'hover:bg-red-50 border-red-200' : 'hover:bg-brand-lightBg'}`}>
-                  <input type="radio" value={u} {...register('urgency')} className={`radio ${u === Urgency.CRITICAL ? 'radio-error' : 'radio-primary'}`} />
-                  <span className={`font-bold ${u === Urgency.CRITICAL ? 'text-red-600' : ''}`}>{u}</span>
-                </label>
-              ))}
+           <div className="form-control w-full">
+             <label className="label"><span className="label-text font-bold text-lg">{t('form.district')}</span></label>
+             <select {...register('district')} className="select select-bordered select-lg w-full bg-brand-lightBg dark:bg-[#2a2a2a]">
+               <option value="">Select District</option>
+               <option value="District 1">Al-Zahra (District 1)</option>
+               <option value="District 2">Al-Mogambo (District 2)</option>
+               <option value="District 3">Al-Furqan (District 3)</option>
+             </select>
+             {assignedPerson && <div className="text-xs mt-2 text-brand-primary flex items-center gap-1"><CheckCircleIcon className="w-3 h-3"/> Routing to: {assignedPerson}</div>}
+             {errors.district && <span className="text-error text-sm mt-1">{errors.district.message}</span>}
            </div>
-        </div>
+
+           <div className="form-control w-full">
+             <label className="label"><span className="label-text font-bold text-lg">Location</span></label>
+             <input type="text" {...register('location')} className="input input-bordered input-lg w-full bg-brand-lightBg dark:bg-[#2a2a2a]" placeholder="Street name, building, or landmark" />
+             {errors.location && <span className="text-error text-sm mt-1">{errors.location.message}</span>}
+           </div>
+         </div>
+
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+           <div className="form-control w-full">
+             <label className="label"><span className="label-text font-bold text-lg">{t('form.category')}</span></label>
+             <select {...register('category')} className="select select-bordered select-lg w-full bg-brand-lightBg dark:bg-[#2a2a2a]">
+               <option value="">Select Category</option>
+               <option value="Electricity">Electricity</option>
+               <option value="Water">Water</option>
+               <option value="Roads">Roads</option>
+               <option value="Sanitation">Sanitation</option>
+               <option value="Security">Security</option>
+               <option value="Other">Other</option>
+             </select>
+             {errors.category && <span className="text-error text-sm mt-1">{errors.category.message}</span>}
+           </div>
+
+           <div className="form-control w-full">
+             <label className="label"><span className="label-text font-bold text-lg">{t('form.urgency')}</span></label>
+             <div className="flex gap-2 flex-wrap">
+               {Object.values(Urgency).map((u) => (
+                 <label key={u} className={`flex-1 cursor-pointer flex items-center justify-center gap-2 border p-3 rounded-xl transition-all ${u === Urgency.CRITICAL ? 'hover:bg-red-50 border-red-200' : 'hover:bg-brand-lightBg'}`}>
+                   <input type="radio" value={u} {...register('urgency')} className={`radio ${u === Urgency.CRITICAL ? 'radio-error' : 'radio-primary'}`} />
+                   <span className={`font-bold text-sm ${u === Urgency.CRITICAL ? 'text-red-600' : ''}`}>{u}</span>
+                 </label>
+               ))}
+             </div>
+           </div>
+         </div>
+
 
         <div className="form-control">
           <label className="label"><span className="label-text font-bold text-lg">{t('form.title_input')}</span></label>

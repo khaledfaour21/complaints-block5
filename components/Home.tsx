@@ -43,7 +43,7 @@ export const Home: React.FC = () => {
                     <h1 className="text-5xl font-bold font-cairo mb-4 leading-tight">{t('home.welcome')}</h1>
                     <p className="py-6 text-lg opacity-90">{t('hero.subtitle')}</p>
                     <div className="flex gap-4 justify-center">
-                        <Link to="/submit" className="btn btn-lg btn-secondary text-brand-accent border-brand-accent hover:bg-brand-accent hover:text-brand-secondary">
+                        <Link to="/submit" className="btn btn-lg text-white border-none hover:opacity-90" style={{ backgroundColor: '#428177' }}>
                             {t('home.submit_card')}
                         </Link>
                     </div>
@@ -60,7 +60,7 @@ export const Home: React.FC = () => {
                     </div>
                     <h2 className="card-title font-cairo">{t('home.submit_card')}</h2>
                     <p className="text-sm text-gray-500">Report an issue in your district easily.</p>
-                    <div className="mt-4 text-brand-primary flex items-center gap-1 font-bold text-sm group">
+                    <div className="mt-4 flex items-center gap-1 font-bold text-sm group" style={{ color: '#428177' }}>
                         Go Now <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform rtl:group-hover:-translate-x-1" />
                     </div>
                 </div>
@@ -73,7 +73,7 @@ export const Home: React.FC = () => {
                     </div>
                     <h2 className="card-title font-cairo">{t('home.track_card')}</h2>
                     <p className="text-sm text-gray-500">Check the status of your existing complaints.</p>
-                    <div className="mt-4 text-brand-primary flex items-center gap-1 font-bold text-sm group">
+                    <div className="mt-4 flex items-center gap-1 font-bold text-sm group" style={{ color: '#428177' }}>
                         Go Now <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform rtl:group-hover:-translate-x-1" />
                     </div>
                 </div>
@@ -86,7 +86,7 @@ export const Home: React.FC = () => {
                     </div>
                     <h2 className="card-title font-cairo">{t('home.achieve_card')}</h2>
                     <p className="text-sm text-gray-500">See how we are improving the community.</p>
-                    <div className="mt-4 text-brand-primary flex items-center gap-1 font-bold text-sm group">
+                    <div className="mt-4 flex items-center gap-1 font-bold text-sm group" style={{ color: '#428177' }}>
                         Go Now <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform rtl:group-hover:-translate-x-1" />
                     </div>
                 </div>

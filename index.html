@@ -5,23 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fifth Block | Complaint Management System</title>
     
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <!-- Local Fonts -->
+    <style>
+      @font-face {
+        font-family: 'itfQomraArabic';
+        src: url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Light.woff2') format('woff2'),
+             url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Light.woff') format('woff'),
+             url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Light.ttf') format('truetype');
+        font-weight: 300;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'itfQomraArabic';
+        src: url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Regular.woff2') format('woff2'),
+             url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Regular.woff') format('woff'),
+             url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Regular.ttf') format('truetype');
+        font-weight: 400;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'itfQomraArabic';
+        src: url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Medium.woff2') format('woff2'),
+             url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Medium.woff') format('woff'),
+             url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Medium.ttf') format('truetype');
+        font-weight: 500;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'itfQomraArabic';
+        src: url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Bold.woff2') format('woff2'),
+             url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Bold.woff') format('woff'),
+             url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Bold.ttf') format('truetype');
+        font-weight: 700;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'itfQomraArabic';
+        src: url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Black.woff2') format('woff2'),
+             url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Black.woff') format('woff'),
+             url('/font/itf_qomra_arabic_fonts/itfQomraArabic-Black.ttf') format('truetype');
+        font-weight: 900;
+        font-style: normal;
+      }
+    </style>
+
     <!-- Tailwind CSS & DaisyUI -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <script>
       tailwind.config = {
         darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Inter', 'ui-sans-serif', 'system-ui'],
-              cairo: ['Cairo', 'sans-serif'],
+              sans: ['itfQomraArabic', 'ui-sans-serif', 'system-ui'],
+              cairo: ['itfQomraArabic', 'sans-serif'],
             },
             colors: {
               brand: {
@@ -37,27 +76,12 @@
         }
       }
     </script>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "recharts": "https://aistudiocdn.com/recharts@^3.4.1",
-    "@hookform/resolvers/": "https://aistudiocdn.com/@hookform/resolvers@^5.2.2/",
-    "@tanstack/react-table": "https://aistudiocdn.com/@tanstack/react-table@^8.21.3",
-    "zod": "https://aistudiocdn.com/zod@^4.1.12",
-    "react-hook-form": "https://aistudiocdn.com/react-hook-form@^7.66.1",
-    "zustand/": "https://aistudiocdn.com/zustand@^5.0.8/",
-    "zustand": "https://aistudiocdn.com/zustand@^5.0.8",
-    "@heroicons/react/": "https://aistudiocdn.com/@heroicons/react@^2.2.0/"
-  }
-}
-</script>
+ 
 </head>
+
   <body class="bg-brand-lightBg dark:bg-brand-darkBg text-brand-secondary dark:text-brand-lightBg transition-colors duration-300">
     <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+
   </body>
 </html>
