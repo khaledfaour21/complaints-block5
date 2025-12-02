@@ -35,18 +35,42 @@ export const Tracking: React.FC = () => {
     }
   };
 
-  // Status Steps Helper
-  const getStepClass = (step: number, currentStatus: ComplaintStatus) => {
-    const statusOrder = [
-      ComplaintStatus.UNREAD,
-      ComplaintStatus.IN_PROGRESS,
-      ComplaintStatus.COMPLETED,
-    ];
-    const currentIndex = statusOrder.indexOf(currentStatus);
+  // Get status display text
+  const getStatusDisplay = (status: ComplaintStatus) => {
+    switch (status) {
+      case ComplaintStatus.COMPLETED:
+        return "Completed";
+      case ComplaintStatus.REJECTED:
+        return "Rejected";
+      case ComplaintStatus.CLOSED:
+        return "Closed";
+      default:
+        return "In Progress";
+    }
+  };
 
-    if (currentStatus === ComplaintStatus.REJECTED) return "step-error";
-    if (currentIndex >= step) return "step-primary";
-    return "";
+  // Get status description based on complaint resolution
+  const getStatusDescription = (complaint: Complaint) => {
+    if (
+      complaint.status === ComplaintStatus.COMPLETED &&
+      complaint.solutionInfo
+    ) {
+      return complaint.solutionInfo;
+    }
+    if (
+      complaint.status === ComplaintStatus.REJECTED &&
+      complaint.refusalReason
+    ) {
+      return complaint.refusalReason;
+    }
+    if (
+      complaint.status === ComplaintStatus.CLOSED &&
+      complaint.refusalReason
+    ) {
+      return complaint.refusalReason;
+    }
+    // For in progress or other statuses, show original description
+    return complaint.description;
   };
 
   return (
@@ -121,46 +145,44 @@ export const Tracking: React.FC = () => {
               </div>
             </div>
 
-            {/* Timeline */}
-            <ul className="steps steps-vertical lg:steps-horizontal w-full my-6">
-              <li className={`step ${getStepClass(0, result.status)}`}>
-                {t("status.unread")}
-              </li>
-              <li className={`step ${getStepClass(1, result.status)}`}>
-                {t("status.inprogress")}
-              </li>
-              <li className={`step ${getStepClass(2, result.status)}`}>
-                {t("status.completed")}
-              </li>
-            </ul>
-
-            {result.status === ComplaintStatus.REJECTED && (
-              <div className="alert alert-error">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="stroke-current shrink-0 h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span>{t("tracking.rejection_msg")}</span>
+            {/* Status Display */}
+            <div className="flex items-center justify-center my-6">
+              <div
+                className={`badge badge-lg ${
+                  result.status === ComplaintStatus.COMPLETED
+                    ? "badge-success"
+                    : result.status === ComplaintStatus.REJECTED ||
+                      result.status === ComplaintStatus.CLOSED
+                    ? "badge-error"
+                    : "badge-warning"
+                }`}
+              >
+                {getStatusDisplay(result.status)}
               </div>
-            )}
+            </div>
 
             <div className="divider"></div>
+
+            {/* Status Details */}
+            <div className="bg-brand-lightBg dark:bg-[#2a2a2a] p-4 rounded-lg mb-6">
+              <h4 className="font-bold mb-2 flex items-center gap-2">
+                <ClipboardDocumentListIcon className="w-5 h-5" />{" "}
+                {result.status === ComplaintStatus.COMPLETED
+                  ? "Solution Details"
+                  : result.status === ComplaintStatus.REJECTED ||
+                    result.status === ComplaintStatus.CLOSED
+                  ? "Rejection Reason"
+                  : "Current Status"}
+              </h4>
+              <p className="text-sm">{getStatusDescription(result)}</p>
+            </div>
 
             {/* Details Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-brand-lightBg dark:bg-[#2a2a2a] p-4 rounded-lg">
                 <h4 className="font-bold mb-2 flex items-center gap-2">
-                  <ClipboardDocumentListIcon className="w-5 h-5" />{" "}
-                  {t("tracking.description")}
+                  <ClipboardDocumentListIcon className="w-5 h-5" /> Original
+                  Complaint
                 </h4>
                 <p className="text-sm">{result.description}</p>
               </div>
