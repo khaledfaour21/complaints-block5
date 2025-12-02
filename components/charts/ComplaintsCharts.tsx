@@ -1,12 +1,28 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, Area, AreaChart
-} from 'recharts';
-import { ChartBarIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { Complaint, Importance, ComplaintStatus, Role } from '../../types';
-import { api } from '../../services/api';
-import { useAuthStore } from '../../store';
+import React, { useEffect, useState, useMemo } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  Area,
+  AreaChart,
+} from "recharts";
+import {
+  ChartBarIcon,
+  ClockIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
+import { Complaint, Importance, ComplaintStatus, Role } from "../../types";
+import { api } from "../../services/api";
+import { useAuthStore } from "../../store";
 
 interface ComplaintsChartsProps {
   complaints: Complaint[];
@@ -20,75 +36,89 @@ interface ComplaintsChartsProps {
 // Chart color schemes
 const COLORS = {
   importance: {
-    high: '#ef4444',
-    medium: '#f59e0b', 
-    low: '#10b981'
+    high: "#ef4444",
+    medium: "#f59e0b",
+    low: "#10b981",
   },
   status: {
-    pending: '#ef4444',
-    under_review: '#f59e0b',
-    in_progress: '#3b82f6',
-    completed: '#10b981',
-    closed: '#6b7280'
+    pending: "#ef4444",
+    under_review: "#f59e0b",
+    in_progress: "#3b82f6",
+    completed: "#10b981",
+    closed: "#6b7280",
   },
-  timeline: '#3b82f6'
+  timeline: "#3b82f6",
 };
 
 // Importance Chart Component
-export const ImportanceChart: React.FC<{ complaints: Complaint[]; title?: string }> = ({ 
-  complaints, 
-  title = "Complaints by Importance" 
-}) => {
+export const ImportanceChart: React.FC<{
+  complaints: Complaint[];
+  title?: string;
+}> = ({ complaints, title = "Complaints by Importance" }) => {
   const { user } = useAuthStore();
   const [filteredComplaints, setFilteredComplaints] = useState<Complaint[]>([]);
 
   useEffect(() => {
     // Apply role-based filtering
     let filtered = [...complaints];
-    
+
     if (user?.role === Role.MUKTAR) {
       // Mukhtar only sees LOW importance complaints
-      filtered = complaints.filter(c => c.importance === Importance.LOW);
+      filtered = complaints.filter((c) => c.importance === Importance.LOW);
     } else if (user?.role === Role.ADMIN) {
       // Admin sees MEDIUM + LOW importance complaints
-      filtered = complaints.filter(c => 
-        c.importance === Importance.MEDIUM || c.importance === Importance.LOW
+      filtered = complaints.filter(
+        (c) =>
+          c.importance === Importance.MEDIUM || c.importance === Importance.LOW
       );
     }
     // Manager sees all data (no filtering)
-    
+
     setFilteredComplaints(filtered);
   }, [complaints, user?.role]);
 
   const data = useMemo(() => {
     const counts = {
-      high: filteredComplaints.filter(c => c.importance === Importance.HIGH).length,
-      medium: filteredComplaints.filter(c => c.importance === Importance.MEDIUM).length,
-      low: filteredComplaints.filter(c => c.importance === Importance.LOW).length,
+      high: filteredComplaints.filter((c) => c.importance === Importance.HIGH)
+        .length,
+      medium: filteredComplaints.filter(
+        (c) => c.importance === Importance.MEDIUM
+      ).length,
+      low: filteredComplaints.filter((c) => c.importance === Importance.LOW)
+        .length,
     };
 
     return [
       {
-        name: 'High',
-        nameAr: 'عالية',
+        name: "High",
+        nameAr: "عالية",
         value: counts.high,
         color: COLORS.importance.high,
-        percentage: filteredComplaints.length > 0 ? ((counts.high / filteredComplaints.length) * 100).toFixed(1) : '0'
+        percentage:
+          filteredComplaints.length > 0
+            ? ((counts.high / filteredComplaints.length) * 100).toFixed(1)
+            : "0",
       },
       {
-        name: 'Medium',
-        nameAr: 'متوسطة',
+        name: "Medium",
+        nameAr: "متوسطة",
         value: counts.medium,
         color: COLORS.importance.medium,
-        percentage: filteredComplaints.length > 0 ? ((counts.medium / filteredComplaints.length) * 100).toFixed(1) : '0'
+        percentage:
+          filteredComplaints.length > 0
+            ? ((counts.medium / filteredComplaints.length) * 100).toFixed(1)
+            : "0",
       },
       {
-        name: 'Low',
-        nameAr: 'منخفضة',
+        name: "Low",
+        nameAr: "منخفضة",
         value: counts.low,
         color: COLORS.importance.low,
-        percentage: filteredComplaints.length > 0 ? ((counts.low / filteredComplaints.length) * 100).toFixed(1) : '0'
-      }
+        percentage:
+          filteredComplaints.length > 0
+            ? ((counts.low / filteredComplaints.length) * 100).toFixed(1)
+            : "0",
+      },
     ];
   }, [filteredComplaints]);
 
@@ -104,25 +134,51 @@ export const ImportanceChart: React.FC<{ complaints: Complaint[]; title?: string
         </h3>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <BarChart
+              data={data}
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            >
               <defs>
                 {data.map((entry, index) => (
-                  <linearGradient key={`gradient-${index}`} id={`importance-gradient-${index}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={entry.color} stopOpacity={0.8}/>
-                    <stop offset="50%" stopColor={entry.color} stopOpacity={0.6}/>
-                    <stop offset="95%" stopColor={entry.color} stopOpacity={0.4}/>
+                  <linearGradient
+                    key={`gradient-${index}`}
+                    id={`importance-gradient-${index}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor={entry.color}
+                      stopOpacity={0.8}
+                    />
+                    <stop
+                      offset="50%"
+                      stopColor={entry.color}
+                      stopOpacity={0.6}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor={entry.color}
+                      stopOpacity={0.4}
+                    />
                   </linearGradient>
                 ))}
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
-              <XAxis 
-                dataKey="name" 
-                tick={{ fontSize: 12, fill: '#6b7280' }}
-                axisLine={{ stroke: '#d1d5db' }}
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#e5e7eb"
+                opacity={0.3}
               />
-              <YAxis 
-                tick={{ fontSize: 12, fill: '#6b7280' }}
-                axisLine={{ stroke: '#d1d5db' }}
+              <XAxis
+                dataKey="name"
+                tick={{ fontSize: 12, fill: "#6b7280" }}
+                axisLine={{ stroke: "#d1d5db" }}
+              />
+              <YAxis
+                tick={{ fontSize: 12, fill: "#6b7280" }}
+                axisLine={{ stroke: "#d1d5db" }}
               />
               <Tooltip
                 content={({ active, payload, label }) => {
@@ -130,10 +186,18 @@ export const ImportanceChart: React.FC<{ complaints: Complaint[]; title?: string
                     const data = payload[0].payload;
                     return (
                       <div className="bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
-                        <p className="font-semibold text-brand-primary mb-2">{label} Importance</p>
+                        <p className="font-semibold text-brand-primary mb-2">
+                          {label} Importance
+                        </p>
                         <div className="space-y-1">
                           <p className="text-sm text-gray-600 dark:text-gray-300">
-                            Count: <span className="font-bold" style={{ color: data.color }}>{data.value}</span>
+                            Count:{" "}
+                            <span
+                              className="font-bold"
+                              style={{ color: data.color }}
+                            >
+                              {data.value}
+                            </span>
                           </p>
                           <p className="text-xs text-gray-500">
                             Percentage: {data.percentage}%
@@ -159,18 +223,19 @@ export const ImportanceChart: React.FC<{ complaints: Complaint[]; title?: string
           </ResponsiveContainer>
         </div>
         <div className="flex flex-wrap justify-center gap-3 mt-4">
-          {data.map((item, index) => (
-            item.value > 0 && (
-              <div key={index} className="flex items-center gap-2 text-sm">
-                <div
-                  className="w-4 h-4 rounded-full shadow-sm"
-                  style={{ backgroundColor: item.color }}
-                ></div>
-                <span className="font-medium">{item.name}</span>
-                <span className="text-gray-500">({item.value})</span>
-              </div>
-            )
-          ))}
+          {data.map(
+            (item, index) =>
+              item.value > 0 && (
+                <div key={index} className="flex items-center gap-2 text-sm">
+                  <div
+                    className="w-4 h-4 rounded-full shadow-sm"
+                    style={{ backgroundColor: item.color }}
+                  ></div>
+                  <span className="font-medium">{item.name}</span>
+                  <span className="text-gray-500">({item.value})</span>
+                </div>
+              )
+          )}
         </div>
       </div>
     </div>
@@ -178,50 +243,82 @@ export const ImportanceChart: React.FC<{ complaints: Complaint[]; title?: string
 };
 
 // Status Chart Component
-export const StatusChart: React.FC<{ complaints: Complaint[]; title?: string }> = ({ 
-  complaints, 
-  title = "Complaints by Status" 
-}) => {
+export const StatusChart: React.FC<{
+  complaints: Complaint[];
+  title?: string;
+}> = ({ complaints, title = "Complaints by Status" }) => {
+  const { user } = useAuthStore();
+  const [filteredComplaints, setFilteredComplaints] = useState<Complaint[]>([]);
+
+  useEffect(() => {
+    // Apply role-based filtering
+    let filtered = [...complaints];
+
+    if (user?.role === Role.MUKTAR) {
+      // Mukhtar only sees LOW importance complaints
+      filtered = complaints.filter((c) => c.importance === Importance.LOW);
+    } else if (user?.role === Role.ADMIN) {
+      // Admin sees MEDIUM + LOW importance complaints
+      filtered = complaints.filter(
+        (c) =>
+          c.importance === Importance.MEDIUM || c.importance === Importance.LOW
+      );
+    }
+    // Manager sees all data (no filtering)
+
+    setFilteredComplaints(filtered);
+  }, [complaints, user?.role]);
+
   const data = useMemo(() => {
     const counts = {
-      pending: complaints.filter(c => c.status === ComplaintStatus.PENDING).length,
-      under_review: complaints.filter(c => c.status === ComplaintStatus.UNDER_REVIEW).length,
-      in_progress: complaints.filter(c => c.status === ComplaintStatus.IN_PROGRESS).length,
-      completed: complaints.filter(c => c.status === ComplaintStatus.COMPLETED).length,
-      closed: complaints.filter(c => c.status === ComplaintStatus.CLOSED).length,
+      pending: filteredComplaints.filter(
+        (c) => c.status === ComplaintStatus.PENDING
+      ).length,
+      under_review: filteredComplaints.filter(
+        (c) => c.status === ComplaintStatus.UNDER_REVIEW
+      ).length,
+      in_progress: filteredComplaints.filter(
+        (c) => c.status === ComplaintStatus.IN_PROGRESS
+      ).length,
+      completed: filteredComplaints.filter(
+        (c) => c.status === ComplaintStatus.COMPLETED
+      ).length,
+      closed: filteredComplaints.filter(
+        (c) => c.status === ComplaintStatus.CLOSED
+      ).length,
     };
 
     return [
       {
-        name: 'Pending',
-        nameAr: 'معلق',
+        name: "Pending",
+        nameAr: "معلق",
         value: counts.pending,
-        color: COLORS.status.pending
+        color: COLORS.status.pending,
       },
       {
-        name: 'Under Review',
-        nameAr: 'قيد المراجعة',
+        name: "Under Review",
+        nameAr: "قيد المراجعة",
         value: counts.under_review,
-        color: COLORS.status.under_review
+        color: COLORS.status.under_review,
       },
       {
-        name: 'In Progress',
-        nameAr: 'قيد المعالجة',
+        name: "In Progress",
+        nameAr: "قيد المعالجة",
         value: counts.in_progress,
-        color: COLORS.status.in_progress
+        color: COLORS.status.in_progress,
       },
       {
-        name: 'Completed',
-        nameAr: 'مكتمل',
+        name: "Completed",
+        nameAr: "مكتمل",
         value: counts.completed,
-        color: COLORS.status.completed
+        color: COLORS.status.completed,
       },
       {
-        name: 'Closed',
-        nameAr: 'مغلق',
+        name: "Closed",
+        nameAr: "مغلق",
         value: counts.closed,
-        color: COLORS.status.closed
-      }
+        color: COLORS.status.closed,
+      },
     ];
   }, [complaints]);
 
@@ -232,7 +329,7 @@ export const StatusChart: React.FC<{ complaints: Complaint[]; title?: string }> 
           <ChartBarIcon className="w-6 h-6" />
           {title}
           <div className="badge badge-sm badge-outline">
-            {complaints.length} total
+            {filteredComplaints.length} total
           </div>
         </h3>
         <div className="h-80">
@@ -248,7 +345,7 @@ export const StatusChart: React.FC<{ complaints: Complaint[]; title?: string }> 
                 animationBegin={0}
                 animationDuration={1200}
                 label={({ name, percent, value }) =>
-                  value > 0 ? `${name}: ${(percent * 100).toFixed(1)}%` : ''
+                  value > 0 ? `${name}: ${(percent * 100).toFixed(1)}%` : ""
                 }
                 labelLine={false}
               >
@@ -268,13 +365,28 @@ export const StatusChart: React.FC<{ complaints: Complaint[]; title?: string }> 
                     const data = payload[0].payload;
                     return (
                       <div className="bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
-                        <p className="font-semibold text-brand-primary mb-2">{data.name}</p>
+                        <p className="font-semibold text-brand-primary mb-2">
+                          {data.name}
+                        </p>
                         <div className="space-y-1">
                           <p className="text-sm text-gray-600 dark:text-gray-300">
-                            Count: <span className="font-bold" style={{ color: data.color }}>{data.value}</span>
+                            Count:{" "}
+                            <span
+                              className="font-bold"
+                              style={{ color: data.color }}
+                            >
+                              {data.value}
+                            </span>
                           </p>
                           <p className="text-xs text-gray-500">
-                            Percentage: {complaints.length > 0 ? ((data.value / complaints.length) * 100).toFixed(1) : '0'}%
+                            Percentage:{" "}
+                            {complaints.length > 0
+                              ? (
+                                  (data.value / complaints.length) *
+                                  100
+                                ).toFixed(1)
+                              : "0"}
+                            %
                           </p>
                         </div>
                       </div>
@@ -287,18 +399,19 @@ export const StatusChart: React.FC<{ complaints: Complaint[]; title?: string }> 
           </ResponsiveContainer>
         </div>
         <div className="flex flex-wrap justify-center gap-2 mt-4">
-          {data.map((item, index) => (
-            item.value > 0 && (
-              <div key={index} className="flex items-center gap-2 text-xs">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: item.color }}
-                ></div>
-                <span className="font-medium">{item.name}</span>
-                <span className="text-gray-500">({item.value})</span>
-              </div>
-            )
-          ))}
+          {data.map(
+            (item, index) =>
+              item.value > 0 && (
+                <div key={index} className="flex items-center gap-2 text-xs">
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  ></div>
+                  <span className="font-medium">{item.name}</span>
+                  <span className="text-gray-500">({item.value})</span>
+                </div>
+              )
+          )}
         </div>
       </div>
     </div>
@@ -306,23 +419,50 @@ export const StatusChart: React.FC<{ complaints: Complaint[]; title?: string }> 
 };
 
 // Timeline Chart Component
-export const TimelineChart: React.FC<{ complaints: Complaint[]; title?: string }> = ({ 
-  complaints, 
-  title = "Complaints Timeline" 
-}) => {
+export const TimelineChart: React.FC<{
+  complaints: Complaint[];
+  title?: string;
+}> = ({ complaints, title = "Complaints Timeline" }) => {
+  const { user } = useAuthStore();
+  const [filteredComplaints, setFilteredComplaints] = useState<Complaint[]>([]);
+
+  useEffect(() => {
+    // Apply role-based filtering
+    let filtered = [...complaints];
+
+    if (user?.role === Role.MUKTAR) {
+      // Mukhtar only sees LOW importance complaints
+      filtered = complaints.filter((c) => c.importance === Importance.LOW);
+    } else if (user?.role === Role.ADMIN) {
+      // Admin sees MEDIUM + LOW importance complaints
+      filtered = complaints.filter(
+        (c) =>
+          c.importance === Importance.MEDIUM || c.importance === Importance.LOW
+      );
+    }
+    // Manager sees all data (no filtering)
+
+    setFilteredComplaints(filtered);
+  }, [complaints, user?.role]);
+
   const data = useMemo(() => {
     // Group complaints by month
-    const monthlyData = complaints.reduce((acc, complaint) => {
+    const monthlyData = filteredComplaints.reduce((acc, complaint) => {
       const date = new Date(complaint.createdAt);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const monthName = date.toLocaleDateString('en', { month: 'short', year: 'numeric' });
-      
+      const monthKey = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}`;
+      const monthName = date.toLocaleDateString("en", {
+        month: "short",
+        year: "numeric",
+      });
+
       if (!acc[monthKey]) {
         acc[monthKey] = {
           name: monthName,
           nameAr: monthName,
           count: 0,
-          month: monthKey
+          month: monthKey,
         };
       }
       acc[monthKey].count++;
@@ -330,7 +470,7 @@ export const TimelineChart: React.FC<{ complaints: Complaint[]; title?: string }
     }, {} as Record<string, any>);
 
     // Convert to array and sort by month
-    return Object.values(monthlyData).sort((a: any, b: any) => 
+    return Object.values(monthlyData).sort((a: any, b: any) =>
       a.month.localeCompare(b.month)
     );
   }, [complaints]);
@@ -342,38 +482,68 @@ export const TimelineChart: React.FC<{ complaints: Complaint[]; title?: string }
           <ClockIcon className="w-6 h-6" />
           {title}
           <div className="badge badge-sm badge-outline">
-            {complaints.length} total
+            {filteredComplaints.length} total
           </div>
         </h3>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <AreaChart
+              data={data}
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            >
               <defs>
-                <linearGradient id="timelineGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.timeline} stopOpacity={0.8}/>
-                  <stop offset="50%" stopColor={COLORS.timeline} stopOpacity={0.6}/>
-                  <stop offset="95%" stopColor={COLORS.timeline} stopOpacity={0.1}/>
+                <linearGradient
+                  id="timelineGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop
+                    offset="5%"
+                    stopColor={COLORS.timeline}
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="50%"
+                    stopColor={COLORS.timeline}
+                    stopOpacity={0.6}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor={COLORS.timeline}
+                    stopOpacity={0.1}
+                  />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
-              <XAxis 
-                dataKey="name" 
-                tick={{ fontSize: 12, fill: '#6b7280' }}
-                axisLine={{ stroke: '#d1d5db' }}
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#e5e7eb"
+                opacity={0.3}
               />
-              <YAxis 
-                tick={{ fontSize: 12, fill: '#6b7280' }}
-                axisLine={{ stroke: '#d1d5db' }}
+              <XAxis
+                dataKey="name"
+                tick={{ fontSize: 12, fill: "#6b7280" }}
+                axisLine={{ stroke: "#d1d5db" }}
+              />
+              <YAxis
+                tick={{ fontSize: 12, fill: "#6b7280" }}
+                axisLine={{ stroke: "#d1d5db" }}
               />
               <Tooltip
                 content={({ active, payload, label }) => {
                   if (active && payload && payload.length) {
                     return (
                       <div className="bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
-                        <p className="font-semibold text-brand-primary mb-2">{label}</p>
+                        <p className="font-semibold text-brand-primary mb-2">
+                          {label}
+                        </p>
                         <div className="space-y-1">
                           <p className="text-sm text-gray-600 dark:text-gray-300">
-                            Complaints: <span className="font-bold text-blue-600">{payload[0].value}</span>
+                            Complaints:{" "}
+                            <span className="font-bold text-blue-600">
+                              {payload[0].value}
+                            </span>
                           </p>
                         </div>
                       </div>
@@ -397,7 +567,14 @@ export const TimelineChart: React.FC<{ complaints: Complaint[]; title?: string }
         <div className="flex justify-between items-center mt-4 text-sm text-gray-600 dark:text-gray-400">
           <span>Timeline Period</span>
           <span className="font-semibold text-green-600">
-            Peak: {data.reduce((max, item) => item.count > max.count ? item : max, { count: 0 }).count} complaints
+            Peak:{" "}
+            {
+              data.reduce(
+                (max, item) => (item.count > max.count ? item : max),
+                { count: 0 }
+              ).count
+            }{" "}
+            complaints
           </span>
         </div>
       </div>
@@ -412,7 +589,7 @@ export const ComplaintsCharts: React.FC<ComplaintsChartsProps> = ({
   showAdminCharts = false,
   showMuktarCharts = false,
   autoRefresh = false,
-  refreshInterval = 30000
+  refreshInterval = 30000,
 }) => {
   const { user } = useAuthStore();
 
@@ -422,7 +599,7 @@ export const ComplaintsCharts: React.FC<ComplaintsChartsProps> = ({
 
     const interval = setInterval(() => {
       // In a real application, this would trigger a data refresh
-      console.log('Auto-refreshing chart data...');
+      console.log("Auto-refreshing chart data...");
     }, refreshInterval);
 
     return () => clearInterval(interval);
@@ -439,7 +616,9 @@ export const ComplaintsCharts: React.FC<ComplaintsChartsProps> = ({
     return (
       <div className="alert alert-warning">
         <ExclamationTriangleIcon className="w-6 h-6" />
-        <span>You don't have permission to view charts for this data level.</span>
+        <span>
+          You don't have permission to view charts for this data level.
+        </span>
       </div>
     );
   }
@@ -448,33 +627,39 @@ export const ComplaintsCharts: React.FC<ComplaintsChartsProps> = ({
     <div className="space-y-8">
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <ImportanceChart 
-          complaints={complaints} 
+        <ImportanceChart
+          complaints={complaints}
           title={
-            user?.role === Role.MANAGER ? "All Complaints by Importance" :
-            user?.role === Role.ADMIN ? "Medium + Low Importance Complaints" :
-            "Low Importance Complaints"
-          } 
+            user?.role === Role.MANAGER
+              ? "All Complaints by Importance"
+              : user?.role === Role.ADMIN
+              ? "Medium + Low Importance Complaints"
+              : "Low Importance Complaints"
+          }
         />
-        <StatusChart 
-          complaints={complaints} 
+        <StatusChart
+          complaints={complaints}
           title={
-            user?.role === Role.MANAGER ? "All Complaints by Status" :
-            user?.role === Role.ADMIN ? "Medium + Low Complaints by Status" :
-            "Low Importance Complaints by Status"
-          } 
+            user?.role === Role.MANAGER
+              ? "All Complaints by Status"
+              : user?.role === Role.ADMIN
+              ? "Medium + Low Complaints by Status"
+              : "Low Importance Complaints by Status"
+          }
         />
       </div>
 
       {/* Timeline Chart - Full Width */}
       <div className="lg:col-span-2">
-        <TimelineChart 
-          complaints={complaints} 
+        <TimelineChart
+          complaints={complaints}
           title={
-            user?.role === Role.MANAGER ? "All Complaints Timeline" :
-            user?.role === Role.ADMIN ? "Medium + Low Complaints Timeline" :
-            "Low Importance Complaints Timeline"
-          } 
+            user?.role === Role.MANAGER
+              ? "All Complaints Timeline"
+              : user?.role === Role.ADMIN
+              ? "Medium + Low Complaints Timeline"
+              : "Low Importance Complaints Timeline"
+          }
         />
       </div>
     </div>
