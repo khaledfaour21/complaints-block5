@@ -95,7 +95,7 @@ export const AdminDashboard: React.FC = () => {
     let filtered = complaints;
 
     // Filter by priority: Admin dashboard shows urgent (high priority) complaints
-    filtered = filtered.filter((item) => item.importance === Importance.MEDIUMx);
+    filtered = filtered.filter((item) => item.importance === Importance.MEDIUM);
 
     // Filter by selected admin or user role (for managers viewing specific admins)
     if (user?.role === Role.MANAGER && selectedAdmin) {
