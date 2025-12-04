@@ -31,6 +31,7 @@ interface ComplaintsChartsProps {
   showMuktarCharts?: boolean;
   autoRefresh?: boolean;
   refreshInterval?: number;
+  showTimelineChart?: boolean;
 }
 
 // Chart color schemes
@@ -47,7 +48,20 @@ const COLORS = {
     completed: "#10b981",
     closed: "#6b7280",
   },
-  timeline: "#3b82f6",
+  timeline: [
+    "#3b82f6", // Blue
+    "#10b981", // Green
+    "#f59e0b", // Yellow
+    "#ef4444", // Red
+    "#8b5cf6", // Purple
+    "#06b6d4", // Cyan
+    "#f97316", // Orange
+    "#84cc16", // Lime
+    "#ec4899", // Pink
+    "#6b7280", // Gray
+    "#1f2937", // Dark Gray
+    "#7c3aed", // Violet
+  ],
 };
 
 // Importance Chart Component
@@ -320,7 +334,7 @@ export const StatusChart: React.FC<{
         color: COLORS.status.closed,
       },
     ];
-  }, [complaints]);
+  }, [filteredComplaints]);
 
   return (
     <div className="card bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-blue-900/20 shadow-2xl border border-gray-200 dark:border-gray-700">
@@ -470,10 +484,17 @@ export const TimelineChart: React.FC<{
     }, {} as Record<string, any>);
 
     // Convert to array and sort by month
-    return Object.values(monthlyData).sort((a: any, b: any) =>
+    const sortedData = Object.values(monthlyData).sort((a: any, b: any) =>
       a.month.localeCompare(b.month)
     );
-  }, [complaints]);
+
+    // Add colors to each data point
+    return sortedData.map((item: any, index: number) => ({
+      ...item,
+      color: COLORS.timeline[index % COLORS.timeline.length],
+      index,
+    }));
+  }, [filteredComplaints]);
 
   return (
     <div className="card bg-gradient-to-br from-white to-green-50 dark:from-gray-800 dark:to-green-900/20 shadow-2xl border border-gray-200 dark:border-gray-700">
@@ -492,29 +513,32 @@ export const TimelineChart: React.FC<{
               margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
             >
               <defs>
-                <linearGradient
-                  id="timelineGradient"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop
-                    offset="5%"
-                    stopColor={COLORS.timeline}
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="50%"
-                    stopColor={COLORS.timeline}
-                    stopOpacity={0.6}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor={COLORS.timeline}
-                    stopOpacity={0.1}
-                  />
-                </linearGradient>
+                {data.map((item: any, index: number) => (
+                  <linearGradient
+                    key={`gradient-${index}`}
+                    id={`timeline-gradient-${index}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor={item.color}
+                      stopOpacity={0.8}
+                    />
+                    <stop
+                      offset="50%"
+                      stopColor={item.color}
+                      stopOpacity={0.6}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor={item.color}
+                      stopOpacity={0.1}
+                    />
+                  </linearGradient>
+                ))}
               </defs>
               <CartesianGrid
                 strokeDasharray="3 3"
@@ -533,6 +557,7 @@ export const TimelineChart: React.FC<{
               <Tooltip
                 content={({ active, payload, label }) => {
                   if (active && payload && payload.length) {
+                    const dataPoint = payload[0].payload;
                     return (
                       <div className="bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
                         <p className="font-semibold text-brand-primary mb-2">
@@ -541,7 +566,10 @@ export const TimelineChart: React.FC<{
                         <div className="space-y-1">
                           <p className="text-sm text-gray-600 dark:text-gray-300">
                             Complaints:{" "}
-                            <span className="font-bold text-blue-600">
+                            <span
+                              className="font-bold"
+                              style={{ color: dataPoint.color }}
+                            >
                               {payload[0].value}
                             </span>
                           </p>
@@ -552,15 +580,18 @@ export const TimelineChart: React.FC<{
                   return null;
                 }}
               />
-              <Area
-                type="monotone"
-                dataKey="count"
-                stroke={COLORS.timeline}
-                strokeWidth={3}
-                fill="url(#timelineGradient)"
-                animationBegin={0}
-                animationDuration={1500}
-              />
+              {data.map((item: any, index: number) => (
+                <Area
+                  key={`area-${index}`}
+                  type="monotone"
+                  dataKey="count"
+                  stroke={item.color}
+                  strokeWidth={2}
+                  fill={`url(#timeline-gradient-${index})`}
+                  animationBegin={index * 200}
+                  animationDuration={1000}
+                />
+              ))}
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -577,6 +608,27 @@ export const TimelineChart: React.FC<{
             complaints
           </span>
         </div>
+        <div className="flex flex-wrap justify-center gap-3 mt-4">
+          {data.slice(0, 6).map(
+            // Show first 6 months to avoid overcrowding
+            (item: any, index: number) =>
+              item.count > 0 && (
+                <div key={index} className="flex items-center gap-2 text-sm">
+                  <div
+                    className="w-4 h-4 rounded-full shadow-sm"
+                    style={{ backgroundColor: item.color }}
+                  ></div>
+                  <span className="font-medium">{item.name}</span>
+                  <span className="text-gray-500">({item.count})</span>
+                </div>
+              )
+          )}
+          {data.length > 6 && (
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <span>+{data.length - 6} more months</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -590,6 +642,7 @@ export const ComplaintsCharts: React.FC<ComplaintsChartsProps> = ({
   showMuktarCharts = false,
   autoRefresh = false,
   refreshInterval = 30000,
+  showTimelineChart = true,
 }) => {
   const { user } = useAuthStore();
 
@@ -650,18 +703,20 @@ export const ComplaintsCharts: React.FC<ComplaintsChartsProps> = ({
       </div>
 
       {/* Timeline Chart - Full Width */}
-      <div className="lg:col-span-2">
-        <TimelineChart
-          complaints={complaints}
-          title={
-            user?.role === Role.MANAGER
-              ? "All Complaints Timeline"
-              : user?.role === Role.ADMIN
-              ? "Medium + Low Complaints Timeline"
-              : "Low Importance Complaints Timeline"
-          }
-        />
-      </div>
+      {showTimelineChart && (
+        <div className="lg:col-span-2">
+          <TimelineChart
+            complaints={complaints}
+            title={
+              user?.role === Role.MANAGER
+                ? "All Complaints Timeline"
+                : user?.role === Role.ADMIN
+                ? "Medium + Low Complaints Timeline"
+                : "Low Importance Complaints Timeline"
+            }
+          />
+        </div>
+      )}
     </div>
   );
 };

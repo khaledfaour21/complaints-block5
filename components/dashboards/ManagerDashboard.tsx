@@ -71,6 +71,7 @@ export const ManagerDashboard: React.FC = () => {
   const [admins, setAdmins] = useState<User[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [selectedMuktar, setSelectedMuktar] = useState<User | null>(null);
+  const [selectedAdmin, setSelectedAdmin] = useState<User | null>(null);
   const [systemComplaints, setSystemComplaints] = useState<Complaint[]>([]);
   const [isDemoData, setIsDemoData] = useState(false);
   const [selectedAttachments, setSelectedAttachments] = useState<string[]>([]);
@@ -699,93 +700,7 @@ export const ManagerDashboard: React.FC = () => {
         showContentManagement={true}
       >
         {/* Enhanced System Chart */}
-        <div className="card bg-gradient-to-br from-white to-purple-50 dark:from-gray-800 dark:to-purple-900/20 shadow-2xl border border-gray-200 dark:border-gray-700">
-          <div className="card-body">
-            <h2 className="card-title font-cairo text-brand-primary flex items-center gap-2">
-              <ChartBarIcon className="w-6 h-6" />
-              System Overview
-            </h2>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={statusData}
-                    cx="50%"
-                    cy="45%"
-                    outerRadius={100}
-                    innerRadius={50}
-                    dataKey="value"
-                    animationBegin={0}
-                    animationDuration={1200}
-                    label={({ name, percent, value }) =>
-                      value > 0 ? `${name}: ${(percent * 100).toFixed(1)}%` : ""
-                    }
-                    labelLine={false}
-                  >
-                    {statusData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={entry.color}
-                        stroke={entry.color}
-                        strokeWidth={3}
-                        className="hover:opacity-80 transition-opacity cursor-pointer"
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        const data = payload[0].payload;
-                        return (
-                          <div className="bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
-                            <p className="font-semibold text-brand-primary mb-2">
-                              {data.name}
-                            </p>
-                            <div className="space-y-1">
-                              <p className="text-sm text-gray-600 dark:text-gray-300">
-                                Count:{" "}
-                                <span className="font-bold">{data.value}</span>
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                Percentage:{" "}
-                                {(
-                                  (data.value /
-                                    (systemStats.completed +
-                                      systemStats.pending)) *
-                                  100
-                                ).toFixed(1)}
-                                %
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex flex-wrap justify-center gap-3 mt-4">
-              {statusData.map(
-                (item, index) =>
-                  item.value > 0 && (
-                    <div
-                      key={index}
-                      className="flex items-center gap-2 text-sm"
-                    >
-                      <div
-                        className="w-4 h-4 rounded-full shadow-sm"
-                        style={{ backgroundColor: item.color }}
-                      ></div>
-                      <span className="font-medium">{item.name}</span>
-                      <span className="text-gray-500">({item.value})</span>
-                    </div>
-                  )
-              )}
-            </div>
-          </div>
-        </div>
+        <div className="card bg-gradient-to-br from-white to-purple-50 dark:from-gray-800 dark:to-purple-900/20 shadow-2xl border border-gray-200 dark:border-gray-700"></div>
 
         {/* Recent Complaints Table */}
         <div className="mt-8">
@@ -937,6 +852,7 @@ export const ManagerDashboard: React.FC = () => {
             showManagerCharts={true}
             autoRefresh={true}
             refreshInterval={30000}
+            showTimelineChart={false}
           />
         </div>
 
