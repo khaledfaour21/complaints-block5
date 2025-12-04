@@ -872,6 +872,11 @@ export const ManagerDashboard: React.FC = () => {
                   <div className="stat-desc">Across 3 Districts</div>
                 </div>
                 <div className="stat place-items-center">
+                  <div className="stat-title">Total Admins</div>
+                  <div className="stat-value">{admins.length}</div>
+                  <div className="stat-desc">System Administrators</div>
+                </div>
+                <div className="stat place-items-center">
                   <div className="stat-title">Avg Response</div>
                   <div className="stat-value text-secondary">2.5h</div>
                   <div className="stat-desc text-secondary">↗︎ 10% faster</div>
@@ -893,46 +898,94 @@ export const ManagerDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* List of Muktars */}
-              <div className="card bg-base-100 shadow-xl h-fit">
-                <div className="card-body">
-                  <h3 className="card-title flex items-center gap-2">
-                    <UserGroupIcon className="w-6 h-6 text-brand-primary" />{" "}
-                    Muktar List
-                  </h3>
-                  <div className="overflow-y-auto max-h-[400px]">
-                    <ul className="menu bg-base-200 w-full rounded-box">
-                      {muktars.map((m) => (
-                        <li key={m.id} onClick={() => setSelectedMuktar(m)}>
-                          <a
-                            className={`flex justify-between ${
-                              selectedMuktar?.id === m.id ? "active" : ""
-                            }`}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {/* Lists Section */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* List of Muktars */}
+                <div className="card bg-base-100 shadow-xl h-fit">
+                  <div className="card-body">
+                    <h3 className="card-title flex items-center gap-2">
+                      <UserGroupIcon className="w-6 h-6 text-brand-primary" />{" "}
+                      Muktar List
+                    </h3>
+                    <div className="overflow-y-auto max-h-[300px]">
+                      <ul className="menu bg-base-200 w-full rounded-box">
+                        {muktars.map((m) => (
+                          <li
+                            key={m.id}
+                            onClick={() => {
+                              setSelectedMuktar(m);
+                              setSelectedAdmin(null);
+                            }}
                           >
-                            <div>
-                              <div className="font-bold">{m.name}</div>
-                              <div className="text-xs opacity-70">
-                                {m.district}
+                            <a
+                              className={`flex justify-between ${
+                                selectedMuktar?.id === m.id ? "active" : ""
+                              }`}
+                            >
+                              <div>
+                                <div className="font-bold">{m.name}</div>
+                                <div className="text-xs opacity-70">
+                                  {m.district}
+                                </div>
                               </div>
-                            </div>
-                            <div className="badge badge-sm">Active</div>
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
+                              <div className="badge badge-sm">Active</div>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* List of Admins */}
+                <div className="card bg-base-100 shadow-xl h-fit">
+                  <div className="card-body">
+                    <h3 className="card-title flex items-center gap-2">
+                      <ShieldCheckIcon className="w-6 h-6 text-brand-primary" />{" "}
+                      Admin List
+                    </h3>
+                    <div className="overflow-y-auto max-h-[300px]">
+                      <ul className="menu bg-base-200 w-full rounded-box">
+                        {admins.map((a) => (
+                          <li
+                            key={a.id}
+                            onClick={() => {
+                              setSelectedAdmin(a);
+                              setSelectedMuktar(null);
+                            }}
+                          >
+                            <a
+                              className={`flex justify-between ${
+                                selectedAdmin?.id === a.id ? "active" : ""
+                              }`}
+                            >
+                              <div>
+                                <div className="font-bold">{a.name}</div>
+                                <div className="text-xs opacity-70">
+                                  {a.email}
+                                </div>
+                              </div>
+                              <div className="badge badge-sm">Active</div>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Detail View */}
               <div className="lg:col-span-2 space-y-6">
-                {selectedMuktar ? (
+                {selectedMuktar || selectedAdmin ? (
                   <div className="animate-fade-in">
                     <h3 className="text-2xl font-bold mb-4 font-cairo">
-                      Performance:{" "}
+                      {selectedMuktar ? "Performance:" : "Admin Details:"}{" "}
                       <span className="text-brand-accent">
-                        {selectedMuktar.name}
+                        {selectedMuktar
+                          ? selectedMuktar.name
+                          : selectedAdmin?.name}
                       </span>
                     </h3>
 
