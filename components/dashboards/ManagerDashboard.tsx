@@ -989,190 +989,249 @@ export const ManagerDashboard: React.FC = () => {
                       </span>
                     </h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                      <div className="card bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-gray-800 p-4 shadow-xl border border-blue-200 dark:border-blue-800">
-                        <h4 className="font-bold text-brand-primary mb-4 flex items-center gap-2">
-                          <ChartBarIcon className="w-5 h-5" />
-                          Resolution Trend
-                        </h4>
-                        <div className="h-64">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <LineChart
-                              data={performanceData}
-                              margin={{
-                                top: 5,
-                                right: 30,
-                                left: 20,
-                                bottom: 5,
-                              }}
-                            >
-                              <defs>
-                                <linearGradient
-                                  id="resolvedGradient"
-                                  x1="0"
-                                  y1="0"
-                                  x2="1"
-                                  y2="0"
+                    {selectedMuktar ? (
+                      <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                          <div className="card bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-gray-800 p-4 shadow-xl border border-blue-200 dark:border-blue-800">
+                            <h4 className="font-bold text-brand-primary mb-4 flex items-center gap-2">
+                              <ChartBarIcon className="w-5 h-5" />
+                              Resolution Trend
+                            </h4>
+                            <div className="h-64">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <LineChart
+                                  data={performanceData}
+                                  margin={{
+                                    top: 5,
+                                    right: 30,
+                                    left: 20,
+                                    bottom: 5,
+                                  }}
                                 >
-                                  <stop
-                                    offset="0%"
-                                    stopColor="#3b82f6"
-                                    stopOpacity={0.8}
+                                  <defs>
+                                    <linearGradient
+                                      id="resolvedGradient"
+                                      x1="0"
+                                      y1="0"
+                                      x2="1"
+                                      y2="0"
+                                    >
+                                      <stop
+                                        offset="0%"
+                                        stopColor="#3b82f6"
+                                        stopOpacity={0.8}
+                                      />
+                                      <stop
+                                        offset="100%"
+                                        stopColor="#1d4ed8"
+                                        stopOpacity={0.6}
+                                      />
+                                    </linearGradient>
+                                  </defs>
+                                  <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    stroke="#e5e7eb"
+                                    opacity={0.3}
                                   />
-                                  <stop
-                                    offset="100%"
-                                    stopColor="#1d4ed8"
-                                    stopOpacity={0.6}
+                                  <XAxis
+                                    dataKey="name"
+                                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                                    axisLine={{ stroke: "#d1d5db" }}
                                   />
-                                </linearGradient>
-                              </defs>
-                              <CartesianGrid
-                                strokeDasharray="3 3"
-                                stroke="#e5e7eb"
-                                opacity={0.3}
-                              />
-                              <XAxis
-                                dataKey="name"
-                                tick={{ fontSize: 11, fill: "#6b7280" }}
-                                axisLine={{ stroke: "#d1d5db" }}
-                              />
-                              <YAxis
-                                tick={{ fontSize: 11, fill: "#6b7280" }}
-                                axisLine={{ stroke: "#d1d5db" }}
-                              />
-                              <Tooltip
-                                content={({ active, payload, label }) => {
-                                  if (active && payload && payload.length) {
-                                    return (
-                                      <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
-                                        <p className="font-semibold text-brand-primary">
-                                          {label}
-                                        </p>
-                                        <p className="text-sm text-blue-600">
-                                          Resolved:{" "}
-                                          <span className="font-bold">
-                                            {payload[0].value}
-                                          </span>
-                                        </p>
-                                      </div>
-                                    );
-                                  }
-                                  return null;
-                                }}
-                              />
-                              <Line
-                                type="monotone"
-                                dataKey="resolved"
-                                stroke="url(#resolvedGradient)"
-                                strokeWidth={4}
-                                dot={{ fill: "#3b82f6", strokeWidth: 2, r: 6 }}
-                                activeDot={{
-                                  r: 8,
-                                  stroke: "#3b82f6",
-                                  strokeWidth: 2,
-                                  fill: "#ffffff",
-                                }}
-                                animationDuration={1500}
-                              />
-                            </LineChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </div>
-                      <div className="card bg-gradient-to-br from-orange-50 to-white dark:from-orange-900/20 dark:to-gray-800 p-4 shadow-xl border border-orange-200 dark:border-orange-800">
-                        <h4 className="font-bold text-brand-primary mb-4 flex items-center gap-2">
-                          <ExclamationTriangleIcon className="w-5 h-5" />
-                          Workload
-                        </h4>
-                        <div className="h-64">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart
-                              data={performanceData}
-                              margin={{
-                                top: 5,
-                                right: 30,
-                                left: 20,
-                                bottom: 5,
-                              }}
-                            >
-                              <defs>
-                                <linearGradient
-                                  id="pendingGradient"
-                                  x1="0"
-                                  y1="0"
-                                  x2="0"
-                                  y2="1"
+                                  <YAxis
+                                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                                    axisLine={{ stroke: "#d1d5db" }}
+                                  />
+                                  <Tooltip
+                                    content={({ active, payload, label }) => {
+                                      if (active && payload && payload.length) {
+                                        return (
+                                          <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
+                                            <p className="font-semibold text-brand-primary">
+                                              {label}
+                                            </p>
+                                            <p className="text-sm text-blue-600">
+                                              Resolved:{" "}
+                                              <span className="font-bold">
+                                                {payload[0].value}
+                                              </span>
+                                            </p>
+                                          </div>
+                                        );
+                                      }
+                                      return null;
+                                    }}
+                                  />
+                                  <Line
+                                    type="monotone"
+                                    dataKey="resolved"
+                                    stroke="url(#resolvedGradient)"
+                                    strokeWidth={4}
+                                    dot={{
+                                      fill: "#3b82f6",
+                                      strokeWidth: 2,
+                                      r: 6,
+                                    }}
+                                    activeDot={{
+                                      r: 8,
+                                      stroke: "#3b82f6",
+                                      strokeWidth: 2,
+                                      fill: "#ffffff",
+                                    }}
+                                    animationDuration={1500}
+                                  />
+                                </LineChart>
+                              </ResponsiveContainer>
+                            </div>
+                          </div>
+                          <div className="card bg-gradient-to-br from-orange-50 to-white dark:from-orange-900/20 dark:to-gray-800 p-4 shadow-xl border border-orange-200 dark:border-orange-800">
+                            <h4 className="font-bold text-brand-primary mb-4 flex items-center gap-2">
+                              <ExclamationTriangleIcon className="w-5 h-5" />
+                              Workload
+                            </h4>
+                            <div className="h-64">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <BarChart
+                                  data={performanceData}
+                                  margin={{
+                                    top: 5,
+                                    right: 30,
+                                    left: 20,
+                                    bottom: 5,
+                                  }}
                                 >
-                                  <stop
-                                    offset="0%"
-                                    stopColor="#f59e0b"
-                                    stopOpacity={0.8}
+                                  <defs>
+                                    <linearGradient
+                                      id="pendingGradient"
+                                      x1="0"
+                                      y1="0"
+                                      x2="0"
+                                      y2="1"
+                                    >
+                                      <stop
+                                        offset="0%"
+                                        stopColor="#f59e0b"
+                                        stopOpacity={0.8}
+                                      />
+                                      <stop
+                                        offset="100%"
+                                        stopColor="#d97706"
+                                        stopOpacity={0.6}
+                                      />
+                                    </linearGradient>
+                                  </defs>
+                                  <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    stroke="#e5e7eb"
+                                    opacity={0.3}
                                   />
-                                  <stop
-                                    offset="100%"
-                                    stopColor="#d97706"
-                                    stopOpacity={0.6}
+                                  <XAxis
+                                    dataKey="name"
+                                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                                    axisLine={{ stroke: "#d1d5db" }}
                                   />
-                                </linearGradient>
-                              </defs>
-                              <CartesianGrid
-                                strokeDasharray="3 3"
-                                stroke="#e5e7eb"
-                                opacity={0.3}
-                              />
-                              <XAxis
-                                dataKey="name"
-                                tick={{ fontSize: 11, fill: "#6b7280" }}
-                                axisLine={{ stroke: "#d1d5db" }}
-                              />
-                              <YAxis
-                                tick={{ fontSize: 11, fill: "#6b7280" }}
-                                axisLine={{ stroke: "#d1d5db" }}
-                              />
-                              <Tooltip
-                                content={({ active, payload, label }) => {
-                                  if (active && payload && payload.length) {
-                                    return (
-                                      <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
-                                        <p className="font-semibold text-brand-primary">
-                                          {label}
-                                        </p>
-                                        <p className="text-sm text-orange-600">
-                                          Pending:{" "}
-                                          <span className="font-bold">
-                                            {payload[0].value}
-                                          </span>
-                                        </p>
-                                      </div>
-                                    );
-                                  }
-                                  return null;
-                                }}
-                              />
-                              <Bar
-                                dataKey="pending"
-                                fill="url(#pendingGradient)"
-                                radius={[4, 4, 0, 0]}
-                                animationBegin={300}
-                                animationDuration={1200}
-                              />
-                            </BarChart>
-                          </ResponsiveContainer>
+                                  <YAxis
+                                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                                    axisLine={{ stroke: "#d1d5db" }}
+                                  />
+                                  <Tooltip
+                                    content={({ active, payload, label }) => {
+                                      if (active && payload && payload.length) {
+                                        return (
+                                          <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
+                                            <p className="font-semibold text-brand-primary">
+                                              {label}
+                                            </p>
+                                            <p className="text-sm text-orange-600">
+                                              Pending:{" "}
+                                              <span className="font-bold">
+                                                {payload[0].value}
+                                              </span>
+                                            </p>
+                                          </div>
+                                        );
+                                      }
+                                      return null;
+                                    }}
+                                  />
+                                  <Bar
+                                    dataKey="pending"
+                                    fill="url(#pendingGradient)"
+                                    radius={[4, 4, 0, 0]}
+                                    animationBegin={300}
+                                    animationDuration={1200}
+                                  />
+                                </BarChart>
+                              </ResponsiveContainer>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
 
-                    <div className="alert alert-info bg-brand-lightBg border-brand-primary">
-                      <ChartBarIcon className="w-6 h-6" />
-                      <span>
-                        This muktar has resolved 85% of assigned complaints this
-                        month.
-                      </span>
-                    </div>
+                        <div className="alert alert-info bg-brand-lightBg border-brand-primary">
+                          <ChartBarIcon className="w-6 h-6" />
+                          <span>
+                            This muktar has resolved 85% of assigned complaints
+                            this month.
+                          </span>
+                        </div>
+                      </>
+                    ) : selectedAdmin ? (
+                      <div className="space-y-6">
+                        <div className="card bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-gray-800 p-6 shadow-xl border border-green-200 dark:border-green-800">
+                          <h4 className="font-bold text-brand-primary mb-4 flex items-center gap-2">
+                            <ShieldCheckIcon className="w-5 h-5" />
+                            Administrator Information
+                          </h4>
+                          <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium text-gray-600 dark:text-gray-300">
+                                Full Name:
+                              </span>
+                              <span className="font-bold">
+                                {selectedAdmin.name}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium text-gray-600 dark:text-gray-300">
+                                Email:
+                              </span>
+                              <span className="font-bold">
+                                {selectedAdmin.email}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium text-gray-600 dark:text-gray-300">
+                                Role:
+                              </span>
+                              <span className="font-bold badge badge-primary">
+                                {selectedAdmin.role}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium text-gray-600 dark:text-gray-300">
+                                Joined:
+                              </span>
+                              <span className="font-bold">
+                                {selectedAdmin.joinedAt || "N/A"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="alert alert-success bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
+                          <ShieldCheckIcon className="w-6 h-6" />
+                          <span>
+                            This administrator oversees system operations and
+                            user management.
+                          </span>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-full min-h-[300px] bg-base-100 rounded-xl border-2 border-dashed border-gray-300">
                     <p className="text-gray-400">
-                      Select a Muktar to view details
+                      Select a Muktar or Admin to view details
                     </p>
                   </div>
                 )}

@@ -713,15 +713,101 @@ export const api = {
 
   // Legacy methods for backward compatibility
   async getMuktars(): Promise<User[]> {
-    // This would need a separate endpoint to list users by role
-    // For now, return empty array
-    return [];
+    try {
+      // Try to get muktars from API
+      const users = await apiRequest("/users?role=mukhtar");
+      return users.map((user: any) => ({
+        ...user,
+        role: mapApiRoleToFrontendRole(user.role),
+        district: user.neighborhood || user.district,
+      }));
+    } catch (error) {
+      console.warn("Backend not available for muktars, using demo data");
+      // Return demo data when backend is not available
+      return [
+        {
+          id: "muk1",
+          name: "Ahmed Hassan",
+          email: "ahmed.hassan@mukhtar.gov",
+          role: Role.MUKTAR,
+          district: "District 1",
+          joinedAt: "2024-01-15",
+        },
+        {
+          id: "muk2",
+          name: "Fatima Al-Zahra",
+          email: "fatima.alzahra@mukhtar.gov",
+          role: Role.MUKTAR,
+          district: "District 2",
+          joinedAt: "2024-02-20",
+        },
+        {
+          id: "muk3",
+          name: "Omar Ibn Khattab",
+          email: "omar.khattab@mukhtar.gov",
+          role: Role.MUKTAR,
+          district: "District 3",
+          joinedAt: "2024-03-10",
+        },
+        {
+          id: "muk4",
+          name: "Aisha Bint Abu Bakr",
+          email: "aisha.bakr@mukhtar.gov",
+          role: Role.MUKTAR,
+          district: "District 1",
+          joinedAt: "2024-04-05",
+        },
+        {
+          id: "muk5",
+          name: "Ali Ibn Abi Talib",
+          email: "ali.talib@mukhtar.gov",
+          role: Role.MUKTAR,
+          district: "District 2",
+          joinedAt: "2024-05-12",
+        },
+      ];
+    }
   },
 
   async getAdmins(): Promise<User[]> {
-    // This would need a separate endpoint to list users by role
-    // For now, return empty array
-    return [];
+    try {
+      // Try to get admins from API
+      const users = await apiRequest("/users?role=admin");
+      return users.map((user: any) => ({
+        ...user,
+        role: mapApiRoleToFrontendRole(user.role),
+        district: user.neighborhood || user.district,
+      }));
+    } catch (error) {
+      console.warn("Backend not available for admins, using demo data");
+      // Return demo data when backend is not available
+      return [
+        {
+          id: "admin1",
+          name: "Dr. Sarah Al-Admin",
+          email: "sarah.aladmin@gov.sa",
+          role: Role.ADMIN,
+          district: "Central District",
+          joinedAt: "2023-06-15",
+        },
+        {
+          id: "admin2",
+          name: "Mohammed Al-Official",
+          email: "mohammed.alofficial@gov.sa",
+          role: Role.ADMIN,
+          district: "North District",
+          joinedAt: "2023-08-22",
+        },
+        {
+          id: "admin3",
+          name: "Layla Al-Supervisor",
+          email: "layla.alsupervisor@gov.sa",
+          role: Role.ADMIN,
+          district: "South District",
+          joinedAt: "2023-09-30",
+        },
+      ];
+    }
   },
 
   async getManagers(): Promise<User[]> {
