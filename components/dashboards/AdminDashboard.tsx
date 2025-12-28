@@ -95,9 +95,6 @@ export const AdminDashboard: React.FC = () => {
   const filteredData = useMemo(() => {
     let filtered = complaints;
 
-    // Filter by priority: Admin dashboard shows urgent (high priority) complaints
-    filtered = filtered.filter((item) => item.importance === Importance.MEDIUM);
-
     // Filter by selected admin or user role (for managers viewing specific admins)
     if (user?.role === Role.MANAGER && selectedAdmin) {
       filtered = filtered.filter(
@@ -147,19 +144,33 @@ export const AdminDashboard: React.FC = () => {
           <select
             className="select select-bordered select-xs w-full"
             value={info.getValue()}
-            onChange={(e) => {
+            onChange={async (e) => {
               const newImportance = e.target.value as Importance;
-              api.updateComplaintImportance(
-                info.row.original.id,
-                newImportance
-              );
-              setData((prev) =>
-                prev.map((p) =>
-                  p.id === info.row.original.id
-                    ? { ...p, importance: newImportance }
-                    : p
-                )
-              );
+              const priority =
+                newImportance === Importance.HIGH
+                  ? "high"
+                  : newImportance === Importance.MEDIUM
+                  ? "mid"
+                  : "low";
+              const estimatedReviewTime =
+                newImportance === Importance.HIGH
+                  ? "1 day"
+                  : newImportance === Importance.MEDIUM
+                  ? "3 days"
+                  : "1 week";
+
+              try {
+                await api.updatePriority(info.row.original.id, priority);
+                setData((prev) =>
+                  prev.map((p) =>
+                    p.id === info.row.original.id
+                      ? { ...p, importance: newImportance, estimatedReviewTime }
+                      : p
+                  )
+                );
+              } catch (error) {
+                console.error("Failed to update priority:", error);
+              }
             }}
           >
             {Object.values(Importance).map((u) => (
@@ -215,6 +226,14 @@ export const AdminDashboard: React.FC = () => {
         cell: (info) => <StatusBadge status={info.getValue()} size="sm" />,
       }),
       columnHelper.accessor("createdAt", { header: "Date" }),
+      columnHelper.accessor("estimatedReviewTime", {
+        header: "Review Time",
+        cell: (info) => (
+          <span className="text-sm font-medium">
+            {info.getValue() || "N/A"}
+          </span>
+        ),
+      }),
       columnHelper.accessor("pinned", {
         header: "Pinned",
         cell: (info) => (
@@ -833,7 +852,7 @@ export const AdminDashboard: React.FC = () => {
                 {table.getRowModel().rows.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={13}
+                      colSpan={14}
                       className="text-center py-10 text-gray-400"
                     >
                       No records found matching filters.

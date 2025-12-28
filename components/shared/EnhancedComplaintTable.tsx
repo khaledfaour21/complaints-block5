@@ -62,6 +62,7 @@ export const EnhancedComplaintTable: React.FC<EnhancedComplaintTableProps> = ({
     title: true,
     description: true,
     submissionDate: true,
+    estimatedReviewTime: true,
     importance: true,
     status: true,
     assignedRole: true,
@@ -79,12 +80,32 @@ export const EnhancedComplaintTable: React.FC<EnhancedComplaintTableProps> = ({
     });
   }, [complaints]);
 
-  const handleUpdateImportance = (
+  const handleUpdateImportance = async (
     complaintId: string,
     newImportance: Importance
   ) => {
-    api.updateComplaintImportance(complaintId, newImportance);
-    onUpdateComplaint(complaintId, { importance: newImportance });
+    const priority =
+      newImportance === Importance.HIGH
+        ? "high"
+        : newImportance === Importance.MEDIUM
+        ? "mid"
+        : "low";
+    const estimatedReviewTime =
+      newImportance === Importance.HIGH
+        ? "1 day"
+        : newImportance === Importance.MEDIUM
+        ? "3 days"
+        : "1 week";
+
+    try {
+      await api.updatePriority(complaintId, priority);
+      onUpdateComplaint(complaintId, {
+        importance: newImportance,
+        estimatedReviewTime,
+      });
+    } catch (error) {
+      console.error("Failed to update priority:", error);
+    }
   };
 
   const handleUpdateStatus = (
@@ -208,6 +229,15 @@ export const EnhancedComplaintTable: React.FC<EnhancedComplaintTableProps> = ({
           </span>
         ),
         size: 140,
+      }),
+
+      // Estimated Review Time
+      columnHelper.accessor("estimatedReviewTime", {
+        header: "Review Time",
+        cell: ({ getValue }) => (
+          <span className="text-sm font-medium">{getValue() || "N/A"}</span>
+        ),
+        size: 120,
       }),
 
       // Category

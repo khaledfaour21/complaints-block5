@@ -89,9 +89,6 @@ export const MuktarDashboard: React.FC = () => {
   const filteredData = useMemo(() => {
     let filtered = complaints;
 
-    // Filter by priority: Muktar dashboard shows normal (mid priority) complaints
-    filtered = filtered.filter((item) => item.importance === Importance.LOW);
-
     // Filter by selected mukhtar or user role (for managers viewing specific muktars)
     if (user?.role === Role.MANAGER && selectedMuktar) {
       filtered = filtered.filter(

@@ -295,9 +295,7 @@ export const ManagerDashboard: React.FC = () => {
       const districtMatch = districtFilter
         ? item.district === districtFilter
         : true;
-      return (
-        statusMatch && districtMatch && item.importance === Importance.HIGH
-      );
+      return statusMatch && districtMatch;
     });
   }, [systemComplaints, statusFilter, districtFilter]);
 

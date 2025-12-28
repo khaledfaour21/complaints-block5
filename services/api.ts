@@ -300,16 +300,14 @@ export const api = {
 
   async getComplaints(role: Role): Promise<Complaint[]> {
     try {
-      const complaints = await apiRequest("/complaints");
+      const roleParam = mapFrontendRoleToApiRole(role);
+      const complaints = await apiRequest(`/complaints?role=${roleParam}`);
       const mapped = complaints.map(mapBackendComplaintToFrontend);
-      // If backend returns no data, use demo data
-      if (mapped.length === 0) {
-        console.warn("Backend returned no complaints, using demo data");
-        return getDemoComplaints(role);
-      }
       return mapped;
     } catch (error) {
-      console.warn("Backend not available, using demo data for development");
+      console.warn(
+        "Backend not available for role-based complaints, using demo data for development"
+      );
       // Return demo data when backend is not available
       return getDemoComplaints(role);
     }
@@ -398,6 +396,13 @@ export const api = {
   async toggleWorkingOn(id: string): Promise<Complaint> {
     return apiRequest(`/complaints/${id}/toggle-working-on`, {
       method: "PATCH",
+    });
+  },
+
+  async updatePriority(id: string, priority: string): Promise<Complaint> {
+    return apiRequest(`/complaints/${id}/priority`, {
+      method: "PATCH",
+      body: JSON.stringify({ priority }),
     });
   },
 

@@ -113,25 +113,12 @@ export const ComplaintsDataProvider: React.FC<{
     );
   }, []);
 
-  // Get complaints filtered by role
+  // Get complaints filtered by role (now handled server-side)
   const getComplaintsByRole = useCallback(
     (role: Role): Complaint[] => {
-      let filtered = [...complaints];
-
-      if (role === Role.MUKTAR) {
-        // Mukhtar only sees LOW importance complaints
-        filtered = filtered.filter((c) => c.importance === "Low Importance");
-      } else if (role === Role.ADMIN) {
-        // Admin sees MEDIUM + LOW importance complaints
-        filtered = filtered.filter(
-          (c) =>
-            c.importance === "Medium Importance" ||
-            c.importance === "Low Importance"
-        );
-      }
-      // Manager sees all data (no additional filtering)
-
-      return filtered;
+      // Server-side filtering is now handled in api.getComplaints(role)
+      // This method is kept for backward compatibility but returns all loaded complaints
+      return complaints;
     },
     [complaints]
   );
