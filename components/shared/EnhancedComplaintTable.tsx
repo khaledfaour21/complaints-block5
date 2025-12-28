@@ -134,12 +134,18 @@ export const EnhancedComplaintTable: React.FC<EnhancedComplaintTableProps> = ({
   };
 
   const handleDelete = (complaint: Complaint) => {
+    const isManager = currentUser?.role === Role.MANAGER;
+    const deleteType = isManager ? "permanently delete" : "soft delete";
+    const deleteMessage = isManager
+      ? "This action cannot be undone and will permanently remove the complaint from the system."
+      : "This will mark the complaint as deleted but it can be recovered by administrators.";
+
     if (
       window.confirm(
-        `Are you sure you want to delete complaint "${complaint.title}"?`
+        `Are you sure you want to ${deleteType} complaint "${complaint.title}"?\n\n${deleteMessage}`
       )
     ) {
-      api.deleteComplaint(complaint.id);
+      api.deleteComplaint(complaint.id, isManager);
       onDeleteComplaint(complaint.id);
     }
   };
@@ -403,11 +409,15 @@ export const EnhancedComplaintTable: React.FC<EnhancedComplaintTableProps> = ({
               </button>
             )}
 
-            {(isManagerView || isAdminView) && (
+            {(isManagerView || isAdminView || isMuktarView) && (
               <button
                 onClick={() => handleDelete(row.original)}
                 className="btn btn-xs btn-error text-white p-1"
-                title="Delete Complaint"
+                title={`${
+                  currentUser?.role === Role.MANAGER
+                    ? "Permanently Delete"
+                    : "Soft Delete"
+                } Complaint`}
               >
                 <TrashIcon className="w-3 h-3" />
               </button>

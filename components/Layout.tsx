@@ -65,6 +65,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     const publicItems = [
       { path: "/", label: t("nav.home") },
       { path: "/submit", label: t("home.submit_card") },
+      { path: "/submit-initiative", label: "Submit Initiative" },
       { path: "/track", label: t("nav.track") },
       { path: "/achievements", label: t("nav.achievements") },
       { path: "/announcements", label: t("nav.announcements") },
@@ -123,11 +124,18 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     // Content management for Admin & Manager only
     if (user.role === Role.ADMIN || user.role === Role.MANAGER) {
-      userItems.push({
-        path: "/content",
-        label: t("nav.ads_achievements"),
-        highlight: true,
-      });
+      userItems.push(
+        {
+          path: "/content",
+          label: t("nav.ads_achievements"),
+          highlight: true,
+        },
+        {
+          path: "/initiatives/admin",
+          label: "Initiatives Admin",
+          highlight: true,
+        }
+      );
     }
 
     return userItems;

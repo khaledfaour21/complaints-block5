@@ -129,3 +129,31 @@ export interface FilterState {
   importance: string;
   search: string;
 }
+
+export enum InitiativeStatus {
+  PENDING = "Pending",
+  APPROVED = "Approved",
+  REJECTED = "Rejected",
+}
+
+export interface Initiative {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  district: string;
+  location: string;
+  submitterName: string;
+  submitterEmail: string;
+  submitterPhone: string;
+  status: InitiativeStatus;
+  createdAt: string;
+  updatedAt?: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  rejectionReason?: string;
+  attachments: string[];
+  estimatedBudget?: string;
+  expectedImpact?: string;
+  timeline?: string;
+}

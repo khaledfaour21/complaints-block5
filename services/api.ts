@@ -7,6 +7,8 @@ import {
   Achievement,
   MuktarStats,
   Importance,
+  Initiative,
+  InitiativeStatus,
 } from "../types";
 import {
   mockComplaints,
@@ -346,8 +348,17 @@ export const api = {
     });
   },
 
-  async deleteComplaint(id: string): Promise<{ message: string }> {
-    return apiRequest(`/complaints/${id}`, { method: "DELETE" });
+  async deleteComplaint(
+    id: string,
+    permanent: boolean = false
+  ): Promise<{ message: string }> {
+    if (permanent) {
+      // Permanent delete for managers
+      return apiRequest(`/complaints/${id}`, { method: "DELETE" });
+    } else {
+      // Soft delete for muktars - mark as deleted
+      return apiRequest(`/complaints/${id}/soft-delete`, { method: "PATCH" });
+    }
   },
 
   // Legacy methods for backward compatibility
@@ -903,5 +914,77 @@ export const api = {
         monthlyGrowth: 12.3,
       },
     };
+  },
+
+  // Initiatives methods
+  async submitInitiative(data: {
+    title: string;
+    description: string;
+    category: string;
+    district: string;
+    location: string;
+    submitterName: string;
+    submitterEmail: string;
+    submitterPhone: string;
+    estimatedBudget?: string;
+    expectedImpact?: string;
+    timeline?: string;
+    files?: File[];
+  }): Promise<string> {
+    const response = await fetch(`${API_BASE_URL}/initiatives`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (response.status === 429) {
+      throw new Error("RATE_LIMIT_EXCEEDED");
+    }
+
+    const result = await handleResponse(response);
+    return result.id;
+  },
+
+  async getInitiatives(): Promise<Initiative[]> {
+    try {
+      const initiatives = await apiRequest("/initiatives");
+      return initiatives;
+    } catch (error) {
+      console.warn(
+        "Backend not available for initiatives, returning empty array"
+      );
+      return [];
+    }
+  },
+
+  async getInitiativeById(id: string): Promise<Initiative> {
+    return apiRequest(`/initiatives/${id}`);
+  },
+
+  async approveInitiative(id: string): Promise<Initiative> {
+    return apiRequest(`/initiatives/${id}/approve`, {
+      method: "PATCH",
+    });
+  },
+
+  async rejectInitiative(id: string, reason: string): Promise<Initiative> {
+    return apiRequest(`/initiatives/${id}/reject`, {
+      method: "PATCH",
+      body: JSON.stringify({ reason }),
+    });
+  },
+
+  async updateInitiative(
+    id: string,
+    updates: Partial<Initiative>
+  ): Promise<Initiative> {
+    return apiRequest(`/initiatives/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(updates),
+    });
+  },
+
+  async deleteInitiative(id: string): Promise<{ message: string }> {
+    return apiRequest(`/initiatives/${id}`, { method: "DELETE" });
   },
 };

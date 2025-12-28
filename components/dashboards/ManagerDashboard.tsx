@@ -440,6 +440,13 @@ export const ManagerDashboard: React.FC = () => {
               >
                 ✗ Refuse
               </button>
+              <button
+                className="btn btn-xs btn-error text-white"
+                onClick={() => handleDelete(complaint)}
+                title="Permanently Delete Complaint"
+              >
+                🗑️ Delete
+              </button>
             </div>
           );
         },
@@ -615,6 +622,21 @@ export const ManagerDashboard: React.FC = () => {
     setActionType(action);
     setActionText("");
     setShowActionModal(true);
+  };
+
+  const handleDelete = (complaint: Complaint) => {
+    const deleteMessage =
+      "This action cannot be undone and will permanently remove the complaint from the system.";
+
+    if (
+      window.confirm(
+        `Are you sure you want to permanently delete complaint "${complaint.title}"?\n\n${deleteMessage}`
+      )
+    ) {
+      api.deleteComplaint(complaint.id, true);
+      // Remove from local state
+      setSystemComplaints((prev) => prev.filter((c) => c.id !== complaint.id));
+    }
   };
 
   const handleSubmitAction = async (e: React.FormEvent) => {

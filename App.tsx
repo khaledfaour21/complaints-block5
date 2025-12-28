@@ -8,12 +8,14 @@ import { DashboardSelect } from "./components/DashboardSelect";
 import { Tracking } from "./components/Tracking";
 import { SubmitComplaintEnhanced } from "./components/submit/SubmitComplaintEnhanced";
 import { SubmitSuccess } from "./components/submit/SubmitSuccess";
+import { PublicInitiativeForm } from "./components/submit/PublicInitiativeForm";
 import { PublicAnnouncements } from "./components/announcements/PublicAnnouncements";
 import { PublicAchievements } from "./components/achievements/PublicAchievements";
 import { AchievementDetail } from "./components/achievements/AchievementDetail";
 import { AchievementsAdminPanel } from "./components/achievements/AchievementsAdminPanel";
 import { AnnouncementDetail } from "./components/announcements/AnnouncementDetail";
 import { AnnouncementsAdminPanel } from "./components/announcements/AnnouncementsAdminPanel";
+import { InitiativesAdminPanel } from "./components/initiatives/InitiativesAdminPanel";
 import { AdminDashboard } from "./components/dashboards/AdminDashboard";
 import { MuktarDashboard } from "./components/dashboards/MuktarDashboard";
 import { ManagerDashboard } from "./components/dashboards/ManagerDashboard";
@@ -55,6 +57,10 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/submit" element={<SubmitComplaintEnhanced />} />
             <Route path="/submit/success" element={<SubmitSuccess />} />
+            <Route
+              path="/submit-initiative"
+              element={<PublicInitiativeForm />}
+            />
             <Route path="/track" element={<Tracking />} />
             <Route path="/achievements" element={<PublicAchievements />} />
             <Route path="/achievements/:id" element={<AchievementDetail />} />
@@ -103,6 +109,10 @@ const App: React.FC = () => {
                 element={<AnnouncementsAdminPanel />}
               />
               <Route path="/content" element={<UnifiedContentManagement />} />
+              <Route
+                path="/initiatives/admin"
+                element={<InitiativesAdminPanel />}
+              />
             </Route>
 
             {/* Errors */}

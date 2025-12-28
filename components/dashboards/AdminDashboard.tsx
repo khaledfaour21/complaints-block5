@@ -329,6 +329,17 @@ export const AdminDashboard: React.FC = () => {
               >
                 ✗ Refuse
               </button>
+              <button
+                className="btn btn-xs btn-error text-white"
+                onClick={() => handleDelete(complaint)}
+                title={`${
+                  user?.role === Role.MANAGER
+                    ? "Permanently Delete"
+                    : "Soft Delete"
+                } Complaint`}
+              >
+                🗑️ Delete
+              </button>
             </div>
           );
         },
@@ -476,6 +487,24 @@ export const AdminDashboard: React.FC = () => {
     setActionType(action);
     setActionText("");
     setShowActionModal(true);
+  };
+
+  const handleDelete = (complaint: Complaint) => {
+    const isManager = user?.role === Role.MANAGER;
+    const deleteType = isManager ? "permanently delete" : "soft delete";
+    const deleteMessage = isManager
+      ? "This action cannot be undone and will permanently remove the complaint from the system."
+      : "This will mark the complaint as deleted but it can be recovered by administrators.";
+
+    if (
+      window.confirm(
+        `Are you sure you want to ${deleteType} complaint "${complaint.title}"?\n\n${deleteMessage}`
+      )
+    ) {
+      api.deleteComplaint(complaint.id, isManager);
+      // Remove from local state
+      setData((prev) => prev.filter((c) => c.id !== complaint.id));
+    }
   };
 
   const handleSubmitAction = async (e: React.FormEvent) => {
