@@ -389,29 +389,7 @@ export const ManagerDashboard: React.FC = () => {
       }),
       columnHelper.accessor("status", {
         header: "Status",
-        cell: (info) => (
-          <select
-            className="select select-bordered select-xs w-full"
-            value={info.getValue()}
-            onChange={(e) => {
-              const newStatus = e.target.value as ComplaintStatus;
-              api.updateComplaintStatus(info.row.original.id, newStatus);
-              setData((prev) =>
-                prev.map((p) =>
-                  p.id === info.row.original.id
-                    ? { ...p, status: newStatus }
-                    : p
-                )
-              );
-            }}
-          >
-            {Object.values(ComplaintStatus).map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        ),
+        cell: (info) => <StatusBadge status={info.getValue()} size="sm" />,
       }),
       columnHelper.accessor("createdAt", { header: "Date" }),
       columnHelper.accessor("pinned", {

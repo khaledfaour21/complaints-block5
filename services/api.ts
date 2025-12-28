@@ -8,6 +8,15 @@ import {
   MuktarStats,
   Importance,
 } from "../types";
+import {
+  mockComplaints,
+  mockMuktars,
+  mockAdmins,
+  mockManagers,
+  mockAnnouncements,
+  mockAchievements,
+  getDemoComplaints,
+} from "./mockData";
 
 // Helper function to map API role strings to frontend Role enum
 const mapApiRoleToFrontendRole = (apiRole: string): Role => {
@@ -172,286 +181,6 @@ const mapFrontendComplaintToBackend = (frontendComplaint: Complaint): any => {
   };
 };
 
-// Demo data function for development when backend is not available
-const getDemoComplaints = (role: Role): Complaint[] => {
-  const allComplaints: Complaint[] = [
-    {
-      id: "1",
-      trackingNumber: "TRK-001",
-      district: "Demo District",
-      category: "infrastructure",
-      importance: Importance.HIGH,
-      title: "Pothole on Main Street causing traffic issues",
-      description:
-        "Large pothole on Main Street causing traffic accidents and vehicle damage",
-      status: ComplaintStatus.PENDING,
-      createdAt: "2024-01-15T10:00:00Z",
-      phoneNumber: "0912345678",
-      attachments: [],
-      pinned: false,
-      submitterName: "John Doe",
-      location: "Main Street & Oak Avenue",
-      citizenHelp: "Fill the pothole with asphalt and resurface the area",
-      solutionInfo: "",
-      refusalReason: "",
-      notes: "High priority - multiple reports received, affects traffic flow",
-      estimatedReviewTime: "2 days",
-    },
-    {
-      id: "2",
-      trackingNumber: "TRK-002",
-      district: "Demo District",
-      category: "sanitation",
-      importance: Importance.MEDIUM,
-      title: "Garbage collection delayed for 3 days",
-      description:
-        "Garbage collection delayed for 3 days, causing overflow and health concerns",
-      status: ComplaintStatus.COMPLETED,
-      createdAt: "2024-01-14T14:30:00Z",
-      phoneNumber: "0998765432",
-      attachments: [],
-      pinned: false,
-      submitterName: "Jane Smith",
-      location: "Residential Area Block C",
-      citizenHelp: "Increase collection frequency and add more bins",
-      solutionInfo: "Collection schedule adjusted to twice weekly",
-      refusalReason: "",
-      notes: "Resolved - schedule updated and additional bins deployed",
-      estimatedReviewTime: "1 day",
-    },
-    {
-      id: "3",
-      trackingNumber: "TRK-003",
-      district: "Demo District",
-      category: "lighting",
-      importance: Importance.LOW,
-      title: "Street light not working on Elm Street",
-      description:
-        "Street light not working on Elm Street, creating safety hazard at night",
-      status: ComplaintStatus.PENDING,
-      createdAt: "2024-01-16T08:15:00Z",
-      phoneNumber: "0955566677",
-      attachments: [],
-      pinned: false,
-      submitterName: "Bob Johnson",
-      location: "Elm Street between 5th and 6th",
-      citizenHelp: "Replace the faulty bulb or entire fixture",
-      solutionInfo: "",
-      refusalReason: "",
-      notes: "Maintenance team notified, scheduled for inspection",
-      estimatedReviewTime: "3 days",
-    },
-    {
-      id: "4",
-      trackingNumber: "TRK-004",
-      district: "Demo District",
-      category: "water",
-      importance: Importance.HIGH,
-      title: "Water main leak causing flooding",
-      description: "Water main leak causing flooding and water pressure issues",
-      status: ComplaintStatus.IN_PROGRESS,
-      createdAt: "2024-01-13T16:45:00Z",
-      phoneNumber: "0924681357",
-      attachments: [],
-      pinned: false,
-      submitterName: "Maria Garcia",
-      location: "Water Street & River Road",
-      citizenHelp: "Repair the leak immediately to prevent further damage",
-      solutionInfo: "",
-      refusalReason: "",
-      notes: "Emergency repair team dispatched, temporary fix applied",
-      estimatedReviewTime: "1 day",
-    },
-    {
-      id: "5",
-      trackingNumber: "TRK-005",
-      district: "Demo District",
-      category: "electricity",
-      importance: Importance.HIGH,
-      title: "Power outage affecting entire neighborhood",
-      description: "Power outage affecting entire neighborhood for 4 hours",
-      status: ComplaintStatus.COMPLETED,
-      createdAt: "2024-01-12T22:30:00Z",
-      phoneNumber: "0987654321",
-      attachments: [],
-      pinned: false,
-      submitterName: "Ahmed Hassan",
-      location: "Neighborhood wide - Block A, B, C",
-      citizenHelp: "Investigate transformer failure and replace if necessary",
-      solutionInfo: "Transformer replaced, backup generator installed",
-      refusalReason: "",
-      notes: "Critical infrastructure issue resolved",
-      estimatedReviewTime: "6 hours",
-    },
-    {
-      id: "6",
-      trackingNumber: "TRK-006",
-      district: "Demo District",
-      category: "roads",
-      importance: Importance.MEDIUM,
-      title: "Multiple cracks and sinkholes on secondary roads",
-      description: "Multiple cracks and sinkholes on secondary roads",
-      status: ComplaintStatus.PENDING,
-      createdAt: "2024-01-11T09:20:00Z",
-      phoneNumber: "0935792468",
-      attachments: [],
-      pinned: false,
-      submitterName: "Sarah Wilson",
-      location: "Secondary roads in industrial area",
-      citizenHelp: "Conduct road assessment and schedule repairs",
-      solutionInfo: "",
-      refusalReason: "",
-      notes: "Assessment scheduled for next week",
-      estimatedReviewTime: "5 days",
-    },
-    {
-      id: "7",
-      trackingNumber: "TRK-007",
-      district: "Demo District",
-      category: "sewage",
-      importance: Importance.HIGH,
-      title: "Sewage backup in multiple homes",
-      description: "Sewage backup in multiple homes causing health hazard",
-      status: ComplaintStatus.CLOSED,
-      createdAt: "2024-01-10T11:15:00Z",
-      phoneNumber: "0975318642",
-      attachments: [],
-      pinned: false,
-      submitterName: "David Chen",
-      location: "Residential Block D",
-      citizenHelp: "Clear blockages and repair damaged pipes",
-      solutionInfo: "",
-      refusalReason:
-        "Issue determined to be on private property, not municipal responsibility",
-      notes: "Referred to private plumbing contractor",
-      estimatedReviewTime: "2 days",
-    },
-    {
-      id: "8",
-      trackingNumber: "TRK-008",
-      district: "Demo District",
-      category: "noise",
-      importance: Importance.LOW,
-      title: "Excessive noise from construction site",
-      description: "Excessive noise from construction site during quiet hours",
-      status: ComplaintStatus.COMPLETED,
-      createdAt: "2024-01-09T19:45:00Z",
-      phoneNumber: "0946823571",
-      attachments: [],
-      pinned: false,
-      submitterName: "Lisa Thompson",
-      location: "Construction site on Maple Avenue",
-      citizenHelp: "Enforce noise ordinances and construction time limits",
-      solutionInfo:
-        "Construction company fined and ordered to comply with noise regulations",
-      refusalReason: "",
-      notes: "Resolved through regulatory enforcement",
-      estimatedReviewTime: "3 days",
-    },
-    {
-      id: "9",
-      trackingNumber: "TRK-009",
-      district: "Demo District",
-      category: "parking",
-      importance: Importance.LOW,
-      title: "Illegal parking blocking emergency access",
-      description: "Illegal parking blocking emergency access routes",
-      status: ComplaintStatus.PENDING,
-      createdAt: "2024-01-08T14:10:00Z",
-      phoneNumber: "0968432175",
-      attachments: [],
-      pinned: false,
-      submitterName: "Robert Kim",
-      location: "Emergency access behind shopping center",
-      citizenHelp: "Install no-parking signs and increase enforcement",
-      solutionInfo: "",
-      refusalReason: "",
-      notes: "Signs ordered, increased patrols scheduled",
-      estimatedReviewTime: "1 week",
-    },
-    {
-      id: "10",
-      trackingNumber: "TRK-010",
-      district: "Demo District",
-      category: "green_spaces",
-      importance: Importance.MEDIUM,
-      title: "Park facilities damaged by vandalism",
-      description: "Park facilities damaged by vandalism",
-      status: ComplaintStatus.IN_PROGRESS,
-      createdAt: "2024-01-07T08:30:00Z",
-      phoneNumber: "0913579246",
-      attachments: [],
-      pinned: false,
-      submitterName: "Emma Rodriguez",
-      location: "Central Park playground area",
-      citizenHelp: "Repair damaged equipment and improve security",
-      solutionInfo: "",
-      refusalReason: "",
-      notes: "Repairs in progress, security cameras being installed",
-      estimatedReviewTime: "4 days",
-    },
-    {
-      id: "11",
-      trackingNumber: "TRK-011",
-      district: "Demo District",
-      category: "traffic",
-      importance: Importance.MEDIUM,
-      title: "Traffic signal malfunction causing accidents",
-      description: "Traffic signal malfunction causing accidents",
-      status: ComplaintStatus.COMPLETED,
-      createdAt: "2024-01-06T13:20:00Z",
-      phoneNumber: "0986421357",
-      attachments: [],
-      pinned: false,
-      submitterName: "Michael Brown",
-      location: "Main Street & 1st Avenue intersection",
-      citizenHelp: "Repair or replace faulty traffic signal",
-      solutionInfo: "Signal controller replaced and synchronized",
-      refusalReason: "",
-      notes: "Traffic flow restored, accident rate monitored",
-      estimatedReviewTime: "1 day",
-    },
-    {
-      id: "12",
-      trackingNumber: "TRK-012",
-      district: "Demo District",
-      category: "buildings",
-      importance: Importance.HIGH,
-      title: "Abandoned building posing safety hazard",
-      description: "Abandoned building posing safety hazard",
-      status: ComplaintStatus.PENDING,
-      createdAt: "2024-01-05T10:45:00Z",
-      phoneNumber: "0957283641",
-      attachments: [],
-      pinned: false,
-      submitterName: "Jennifer Lee",
-      location: "123 Commercial Street",
-      citizenHelp: "Secure building and arrange for demolition or renovation",
-      solutionInfo: "",
-      refusalReason: "",
-      notes: "Building inspector scheduled, legal proceedings initiated",
-      estimatedReviewTime: "2 weeks",
-    },
-  ];
-
-  // Filter based on role
-  let filtered = [...allComplaints];
-
-  if (role === Role.MUKTAR) {
-    // Mukhtar only sees LOW importance complaints
-    filtered = allComplaints.filter((c) => c.importance === Importance.LOW);
-  } else if (role === Role.ADMIN) {
-    // Admin sees MEDIUM + LOW importance complaints
-    filtered = allComplaints.filter(
-      (c) =>
-        c.importance === Importance.MEDIUM || c.importance === Importance.LOW
-    );
-  }
-  // Manager sees all data (no filtering)
-
-  return filtered;
-};
-
 export const api = {
   // Authentication methods
   async login(email: string, password: string) {
@@ -570,7 +299,13 @@ export const api = {
   async getComplaints(role: Role): Promise<Complaint[]> {
     try {
       const complaints = await apiRequest("/complaints");
-      return complaints.map(mapBackendComplaintToFrontend);
+      const mapped = complaints.map(mapBackendComplaintToFrontend);
+      // If backend returns no data, use demo data
+      if (mapped.length === 0) {
+        console.warn("Backend returned no complaints, using demo data");
+        return getDemoComplaints(role);
+      }
+      return mapped;
     } catch (error) {
       console.warn("Backend not available, using demo data for development");
       // Return demo data when backend is not available
@@ -714,106 +449,53 @@ export const api = {
   // Legacy methods for backward compatibility
   async getMuktars(): Promise<User[]> {
     try {
-      // Try to get muktars from API
-      const users = await apiRequest("/users?role=mukhtar");
-      return users.map((user: any) => ({
+      // Try to get all users from API and filter by role
+      const users = await apiRequest("/users");
+      const muktars = users.filter((user: any) => user.role === "mukhtar");
+      const mapped = muktars.map((user: any) => ({
         ...user,
         role: mapApiRoleToFrontendRole(user.role),
         district: user.neighborhood || user.district,
       }));
+      // If no muktars found, use demo data
+      if (mapped.length === 0) {
+        console.warn("Backend returned no muktars, using demo data");
+        return mockMuktars;
+      }
+      return mapped;
     } catch (error) {
       console.warn("Backend not available for muktars, using demo data");
       // Return demo data when backend is not available
-      return [
-        {
-          id: "muk1",
-          name: "Ahmed Hassan",
-          email: "ahmed.hassan@mukhtar.gov",
-          role: Role.MUKTAR,
-          district: "District 1",
-          joinedAt: "2024-01-15",
-        },
-        {
-          id: "muk2",
-          name: "Fatima Al-Zahra",
-          email: "fatima.alzahra@mukhtar.gov",
-          role: Role.MUKTAR,
-          district: "District 2",
-          joinedAt: "2024-02-20",
-        },
-        {
-          id: "muk3",
-          name: "Omar Ibn Khattab",
-          email: "omar.khattab@mukhtar.gov",
-          role: Role.MUKTAR,
-          district: "District 3",
-          joinedAt: "2024-03-10",
-        },
-        {
-          id: "muk4",
-          name: "Aisha Bint Abu Bakr",
-          email: "aisha.bakr@mukhtar.gov",
-          role: Role.MUKTAR,
-          district: "District 1",
-          joinedAt: "2024-04-05",
-        },
-        {
-          id: "muk5",
-          name: "Ali Ibn Abi Talib",
-          email: "ali.talib@mukhtar.gov",
-          role: Role.MUKTAR,
-          district: "District 2",
-          joinedAt: "2024-05-12",
-        },
-      ];
+      return mockMuktars;
     }
   },
 
   async getAdmins(): Promise<User[]> {
     try {
-      // Try to get admins from API
-      const users = await apiRequest("/users?role=admin");
-      return users.map((user: any) => ({
+      // Try to get all users from API and filter by role
+      const users = await apiRequest("/users");
+      const admins = users.filter((user: any) => user.role === "admin");
+      const mapped = admins.map((user: any) => ({
         ...user,
         role: mapApiRoleToFrontendRole(user.role),
         district: user.neighborhood || user.district,
       }));
+      // If no admins found, use demo data
+      if (mapped.length === 0) {
+        console.warn("Backend returned no admins, using demo data");
+        return mockAdmins;
+      }
+      return mapped;
     } catch (error) {
       console.warn("Backend not available for admins, using demo data");
       // Return demo data when backend is not available
-      return [
-        {
-          id: "admin1",
-          name: "Dr. Sarah Al-Admin",
-          email: "sarah.aladmin@gov.sa",
-          role: Role.ADMIN,
-          district: "Central District",
-          joinedAt: "2023-06-15",
-        },
-        {
-          id: "admin2",
-          name: "Mohammed Al-Official",
-          email: "mohammed.alofficial@gov.sa",
-          role: Role.ADMIN,
-          district: "North District",
-          joinedAt: "2023-08-22",
-        },
-        {
-          id: "admin3",
-          name: "Layla Al-Supervisor",
-          email: "layla.alsupervisor@gov.sa",
-          role: Role.ADMIN,
-          district: "South District",
-          joinedAt: "2023-09-30",
-        },
-      ];
+      return mockAdmins;
     }
   },
 
   async getManagers(): Promise<User[]> {
-    // This would need a separate endpoint to list users by role
-    // For now, return empty array
-    return [];
+    // Return mock managers data
+    return mockManagers;
   },
 
   async createMuktar(userData: {
@@ -886,7 +568,18 @@ export const api = {
   },
 
   async getAnnouncements(): Promise<Announcement[]> {
-    return apiRequest("/announcements");
+    try {
+      const announcements = await apiRequest("/announcements");
+      // If no announcements, use demo data
+      if (!announcements || announcements.length === 0) {
+        console.warn("Backend returned no announcements, using demo data");
+        return mockAnnouncements;
+      }
+      return announcements;
+    } catch (error) {
+      console.warn("Backend not available for announcements, using demo data");
+      return mockAnnouncements;
+    }
   },
 
   async getAnnouncementById(id: string): Promise<Announcement> {
@@ -922,7 +615,18 @@ export const api = {
   },
 
   async getAchievements(): Promise<Achievement[]> {
-    return apiRequest("/achievements");
+    try {
+      const achievements = await apiRequest("/achievements");
+      // If no achievements, use demo data
+      if (!achievements || achievements.length === 0) {
+        console.warn("Backend returned no achievements, using demo data");
+        return mockAchievements;
+      }
+      return achievements;
+    } catch (error) {
+      console.warn("Backend not available for achievements, using demo data");
+      return mockAchievements;
+    }
   },
 
   async getAchievementById(id: string): Promise<Achievement> {
