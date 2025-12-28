@@ -63,6 +63,8 @@ export interface Complaint {
   solutionInfo?: string;
   refusalReason?: string;
   estimatedReviewTime?: string;
+  isWorkingOn?: boolean;
+  workingOnBy?: string;
 }
 
 export interface Achievement {

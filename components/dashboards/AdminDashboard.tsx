@@ -235,6 +235,51 @@ export const AdminDashboard: React.FC = () => {
           />
         ),
       }),
+
+      // Working On Toggle (Admin only)
+      columnHelper.display({
+        id: "working_on",
+        header: "Working On",
+        cell: (info) => {
+          const complaint = info.row.original;
+          return (
+            <div className="flex flex-col items-center gap-1">
+              <button
+                onClick={async () => {
+                  try {
+                    const updatedComplaint = await api.toggleWorkingOn(
+                      complaint.id
+                    );
+                    setData((prev) =>
+                      prev.map((c) =>
+                        c.id === complaint.id
+                          ? {
+                              ...c,
+                              isWorkingOn: updatedComplaint.isWorkingOn,
+                              workingOnBy: updatedComplaint.workingOnBy,
+                            }
+                          : c
+                      )
+                    );
+                  } catch (error) {
+                    console.error("Failed to toggle working on status:", error);
+                  }
+                }}
+                className={`btn btn-xs ${
+                  complaint.isWorkingOn ? "btn-error" : "btn-success"
+                } text-white`}
+              >
+                {complaint.isWorkingOn ? "Stop Working" : "Start Working"}
+              </button>
+              {complaint.isWorkingOn && complaint.workingOnBy && (
+                <span className="text-xs text-gray-500 text-center">
+                  {complaint.workingOnBy}
+                </span>
+              )}
+            </div>
+          );
+        },
+      }),
       columnHelper.display({
         id: "actions",
         header: "Actions",
@@ -788,7 +833,7 @@ export const AdminDashboard: React.FC = () => {
                 {table.getRowModel().rows.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={12}
+                      colSpan={13}
                       className="text-center py-10 text-gray-400"
                     >
                       No records found matching filters.

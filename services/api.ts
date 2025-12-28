@@ -157,6 +157,8 @@ const mapBackendComplaintToFrontend = (backendComplaint: any): Complaint => {
     refusalReason: backendComplaint.refusalReason,
     notes: backendComplaint.notes,
     estimatedReviewTime: backendComplaint.estimatedReviewTime,
+    isWorkingOn: backendComplaint.isWorkingOn,
+    workingOnBy: backendComplaint.workingOnBy,
   };
 };
 
@@ -391,6 +393,12 @@ export const api = {
   async updateComplaintPinned(id: string, pinned: boolean): Promise<boolean> {
     // This is frontend-specific, no backend call needed
     return true;
+  },
+
+  async toggleWorkingOn(id: string): Promise<Complaint> {
+    return apiRequest(`/complaints/${id}/toggle-working-on`, {
+      method: "PATCH",
+    });
   },
 
   async getUserById(id: string): Promise<User> {

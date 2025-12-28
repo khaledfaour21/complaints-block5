@@ -63,45 +63,47 @@ const App: React.FC = () => {
             <Route path="/complaint/:id" element={<ComplaintDetail />} />
             <Route path="/offline" element={<OfflinePage />} />
 
-            {/* Dashboard Selection */}
-            <Route path="/dashboard-select" element={<DashboardSelect />} />
-
             {/* Protected Routes - General User */}
-            {/* <Route element={<ProtectedRoute />}> */}
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/change-password" element={<ChangePassword />} />
-            <Route path="/notifications" element={<NotificationsCenter />} />
-            {/* </Route> */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard-select" element={<DashboardSelect />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/change-password" element={<ChangePassword />} />
+              <Route path="/notifications" element={<NotificationsCenter />} />
+            </Route>
 
             {/* Role Specific Routes */}
-            {/* <Route element={<ProtectedRoute allowedRoles={[Role.ADMIN]} />}> */}
-            <Route path="/dashboard/admin" element={<AdminDashboard />} />
-            {/* </Route> */}
+            <Route element={<ProtectedRoute allowedRoles={[Role.ADMIN]} />}>
+              <Route path="/dashboard/admin" element={<AdminDashboard />} />
+            </Route>
 
-            {/* <Route element={<ProtectedRoute allowedRoles={[Role.MUKTAR]} />}> */}
-            <Route path="/dashboard/muktar" element={<MuktarDashboard />} />
-            {/* </Route> */}
+            <Route element={<ProtectedRoute allowedRoles={[Role.MUKTAR]} />}>
+              <Route path="/dashboard/muktar" element={<MuktarDashboard />} />
+            </Route>
 
-            {/* <Route element={<ProtectedRoute allowedRoles={[Role.MANAGER]} />}> */}
-            <Route path="/dashboard/manager" element={<ManagerDashboard />} />
-            <Route path="/dashboard/muktar/:id" element={<MuktarDetails />} />
-            <Route path="/users" element={<UserManagement />} />
-            <Route path="/user/:id" element={<UserDetail />} />
-            <Route path="/user/:id/complaints" element={<UserComplaints />} />
-            {/* </Route> */}
+            <Route element={<ProtectedRoute allowedRoles={[Role.MANAGER]} />}>
+              <Route path="/dashboard/manager" element={<ManagerDashboard />} />
+              <Route path="/dashboard/muktar/:id" element={<MuktarDetails />} />
+              <Route path="/users" element={<UserManagement />} />
+              <Route path="/user/:id" element={<UserDetail />} />
+              <Route path="/user/:id/complaints" element={<UserComplaints />} />
+            </Route>
 
-            {/* <Route element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.MANAGER]} />}> */}
             <Route
-              path="/achievements/admin"
-              element={<AchievementsAdminPanel />}
-            />
-            <Route
-              path="/announcements/admin"
-              element={<AnnouncementsAdminPanel />}
-            />
-            <Route path="/content" element={<UnifiedContentManagement />} />
-            {/* </Route> */}
+              element={
+                <ProtectedRoute allowedRoles={[Role.ADMIN, Role.MANAGER]} />
+              }
+            >
+              <Route
+                path="/achievements/admin"
+                element={<AchievementsAdminPanel />}
+              />
+              <Route
+                path="/announcements/admin"
+                element={<AnnouncementsAdminPanel />}
+              />
+              <Route path="/content" element={<UnifiedContentManagement />} />
+            </Route>
 
             {/* Errors */}
             <Route path="/404" element={<NotFound />} />
