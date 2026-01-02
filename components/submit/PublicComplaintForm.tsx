@@ -84,8 +84,16 @@ export const PublicComplaintForm: React.FC = () => {
       });
 
       setSubmittedId(trackId);
-    } catch (error) {
-      console.error("Error submitting complaint:", error);
+    } catch (error: any) {
+      if (error.message === "RATE_LIMIT_EXCEEDED") {
+        // For public form, show a simple alert since it doesn't have error state
+        alert(
+          "You've submitted too many complaints recently. Please wait before submitting another one."
+        );
+      } else {
+        console.error("Error submitting complaint:", error);
+        alert("Failed to submit complaint. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }

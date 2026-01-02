@@ -241,8 +241,15 @@ export const SubmitComplaintEnhanced: React.FC = () => {
       setSubmittedId(trackId);
       setCooldownData(phone, Date.now());
       setSubmittedPhone(phone);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      if (error.message === "RATE_LIMIT_EXCEEDED") {
+        setCooldownMessage(
+          "You've submitted too many complaints recently. Please wait before submitting another one."
+        );
+      } else {
+        console.error(error);
+        setCooldownMessage("Failed to submit complaint. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }

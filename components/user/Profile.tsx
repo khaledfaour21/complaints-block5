@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAuthStore, useLangStore, useToastStore } from "../../store";
+import { api } from "../../services/api";
 import { UserCircleIcon, MapPinIcon } from "@heroicons/react/24/outline";
 
 export const Profile: React.FC = () => {
   const { user, login } = useAuthStore();
   const { t } = useLangStore();
   const { addToast } = useToastStore();
+  const [loading, setLoading] = useState(false);
   const { register, handleSubmit } = useForm({
     defaultValues: {
       name: user?.name,
@@ -15,11 +17,25 @@ export const Profile: React.FC = () => {
     },
   });
 
-  const onSubmit = (data: any) => {
-    if (user) {
-      // Simulate API update
-      login({ ...user, ...data });
+  const onSubmit = async (data: any) => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      // Call API to update user profile
+      const updatedUser = await api.updateUser(user.id, {
+        name: data.name,
+        neighborhood: data.district, // API expects 'neighborhood'
+      });
+
+      // Update local store with response
+      login(updatedUser);
       addToast(t("user.update_success"), "success");
+    } catch (error: any) {
+      console.error("Failed to update profile:", error);
+      addToast("Failed to update profile. Please try again.", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,8 +96,12 @@ export const Profile: React.FC = () => {
               </div>
             )}
             <div className="form-control mt-6">
-              <button className="btn btn-primary text-white">
-                {t("common.save")}
+              <button className="btn btn-primary text-white" disabled={loading}>
+                {loading ? (
+                  <span className="loading loading-dots"></span>
+                ) : (
+                  t("common.save")
+                )}
               </button>
             </div>
           </form>

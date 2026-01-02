@@ -24,8 +24,12 @@ export const Login: React.FC = () => {
       } else {
         setError(t("login.invalid_credentials"));
       }
-    } catch (err) {
-      setError(t("login.failed"));
+    } catch (err: any) {
+      if (err.message === "RATE_LIMIT_EXCEEDED") {
+        setError("Too many login attempts. Please wait before trying again.");
+      } else {
+        setError(t("login.failed"));
+      }
     } finally {
       setLoading(false);
     }

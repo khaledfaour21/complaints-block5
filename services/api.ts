@@ -1,3 +1,32 @@
+/**
+ * API Service Layer
+ *
+ * MOCK DATA USAGE LOGIC:
+ * ======================
+ *
+ * Mock data is ONLY used in development environments when explicitly enabled.
+ * In production, mock data is NEVER used as a fallback.
+ *
+ * Environment Detection:
+ * - Production: NODE_ENV === 'production' OR REACT_APP_ENV === 'production' OR hostname !== 'localhost'
+ * - Development: All other cases
+ *
+ * Mock Data Conditions:
+ * - Environment must be development
+ * - REACT_APP_USE_MOCK_DATA environment variable must be set to 'true'
+ *
+ * Affected Services:
+ * - getComplaints(): Uses getDemoComplaints() for role-based filtering
+ * - getMuktars(): Uses mockMuktars array
+ * - getAdmins(): Uses mockAdmins array
+ * - getManagers(): Uses mockManagers array
+ * - getAnnouncements(): Uses mockAnnouncements array
+ * - getAchievements(): Uses mockAchievements array
+ *
+ * In production, all services will throw errors if backend is unavailable,
+ * ensuring users see proper error messages instead of mock data.
+ */
+
 import {
   Complaint,
   ComplaintStatus,
@@ -51,6 +80,20 @@ const mapFrontendRoleToApiRole = (frontendRole: Role): string => {
 };
 
 const API_BASE_URL = "http://localhost:5000/v1";
+
+// Environment detection for mock data usage
+const isProduction = () => {
+  return (
+    process.env.NODE_ENV === "production" ||
+    process.env.REACT_APP_ENV === "production" ||
+    window.location.hostname !== "localhost"
+  );
+};
+
+// Helper to determine if mock data should be used
+const shouldUseMockData = () => {
+  return !isProduction() && process.env.REACT_APP_USE_MOCK_DATA === "true";
+};
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {
@@ -199,6 +242,10 @@ export const api = {
       body: formData.toString(),
     });
 
+    if (response.status === 429) {
+      throw new Error("RATE_LIMIT_EXCEEDED");
+    }
+
     const data = await handleResponse(response);
     if (data.accessToken) {
       localStorage.setItem("accessToken", data.accessToken);
@@ -234,6 +281,10 @@ export const api = {
         ...(userData.neighborhood && { neighborhood: userData.neighborhood }),
       }),
     });
+
+    if (response.status === 429) {
+      throw new Error("RATE_LIMIT_EXCEEDED");
+    }
 
     const data = await handleResponse(response);
     if (data.accessToken) {
@@ -296,6 +347,10 @@ export const api = {
       body: JSON.stringify(data),
     });
 
+    if (response.status === 429) {
+      throw new Error("RATE_LIMIT_EXCEEDED");
+    }
+
     const result = await handleResponse(response);
     return result.trackingTag;
   },
@@ -307,11 +362,17 @@ export const api = {
       const mapped = complaints.map(mapBackendComplaintToFrontend);
       return mapped;
     } catch (error) {
-      console.warn(
-        "Backend not available for role-based complaints, using demo data for development"
-      );
-      // Return demo data when backend is not available
-      return getDemoComplaints(role);
+      if (shouldUseMockData()) {
+        console.warn("Backend not available, using mock data for development");
+        return getDemoComplaints(role);
+      } else {
+        console.error(
+          "Backend unavailable and mock data disabled in production"
+        );
+        throw new Error(
+          "Service temporarily unavailable. Please try again later."
+        );
+      }
     }
   },
 
@@ -481,16 +542,19 @@ export const api = {
         role: mapApiRoleToFrontendRole(user.role),
         district: user.neighborhood || user.district,
       }));
-      // If no muktars found, use demo data
-      if (mapped.length === 0) {
-        console.warn("Backend returned no muktars, using demo data");
-        return mockMuktars;
-      }
       return mapped;
     } catch (error) {
-      console.warn("Backend not available for muktars, using demo data");
-      // Return demo data when backend is not available
-      return mockMuktars;
+      if (shouldUseMockData()) {
+        console.warn("Backend not available, using mock data for development");
+        return mockMuktars;
+      } else {
+        console.error(
+          "Backend unavailable and mock data disabled in production"
+        );
+        throw new Error(
+          "Service temporarily unavailable. Please try again later."
+        );
+      }
     }
   },
 
@@ -504,22 +568,46 @@ export const api = {
         role: mapApiRoleToFrontendRole(user.role),
         district: user.neighborhood || user.district,
       }));
-      // If no admins found, use demo data
-      if (mapped.length === 0) {
-        console.warn("Backend returned no admins, using demo data");
-        return mockAdmins;
-      }
       return mapped;
     } catch (error) {
-      console.warn("Backend not available for admins, using demo data");
-      // Return demo data when backend is not available
-      return mockAdmins;
+      if (shouldUseMockData()) {
+        console.warn("Backend not available, using mock data for development");
+        return mockAdmins;
+      } else {
+        console.error(
+          "Backend unavailable and mock data disabled in production"
+        );
+        throw new Error(
+          "Service temporarily unavailable. Please try again later."
+        );
+      }
     }
   },
 
   async getManagers(): Promise<User[]> {
-    // Return mock managers data
-    return mockManagers;
+    try {
+      // Try to get all users from API and filter by role
+      const users = await apiRequest("/users");
+      const managers = users.filter((user: any) => user.role === "manager");
+      const mapped = managers.map((user: any) => ({
+        ...user,
+        role: mapApiRoleToFrontendRole(user.role),
+        district: user.neighborhood || user.district,
+      }));
+      return mapped;
+    } catch (error) {
+      if (shouldUseMockData()) {
+        console.warn("Backend not available, using mock data for development");
+        return mockManagers;
+      } else {
+        console.error(
+          "Backend unavailable and mock data disabled in production"
+        );
+        throw new Error(
+          "Service temporarily unavailable. Please try again later."
+        );
+      }
+    }
   },
 
   async createMuktar(userData: {
@@ -594,15 +682,19 @@ export const api = {
   async getAnnouncements(): Promise<Announcement[]> {
     try {
       const announcements = await apiRequest("/announcements");
-      // If no announcements, use demo data
-      if (!announcements || announcements.length === 0) {
-        console.warn("Backend returned no announcements, using demo data");
-        return mockAnnouncements;
-      }
-      return announcements;
+      return announcements || [];
     } catch (error) {
-      console.warn("Backend not available for announcements, using demo data");
-      return mockAnnouncements;
+      if (shouldUseMockData()) {
+        console.warn("Backend not available, using mock data for development");
+        return mockAnnouncements;
+      } else {
+        console.error(
+          "Backend unavailable and mock data disabled in production"
+        );
+        throw new Error(
+          "Service temporarily unavailable. Please try again later."
+        );
+      }
     }
   },
 
@@ -641,15 +733,19 @@ export const api = {
   async getAchievements(): Promise<Achievement[]> {
     try {
       const achievements = await apiRequest("/achievements");
-      // If no achievements, use demo data
-      if (!achievements || achievements.length === 0) {
-        console.warn("Backend returned no achievements, using demo data");
-        return mockAchievements;
-      }
-      return achievements;
+      return achievements || [];
     } catch (error) {
-      console.warn("Backend not available for achievements, using demo data");
-      return mockAchievements;
+      if (shouldUseMockData()) {
+        console.warn("Backend not available, using mock data for development");
+        return mockAchievements;
+      } else {
+        console.error(
+          "Backend unavailable and mock data disabled in production"
+        );
+        throw new Error(
+          "Service temporarily unavailable. Please try again later."
+        );
+      }
     }
   },
 

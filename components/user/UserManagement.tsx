@@ -49,12 +49,58 @@ export const UserManagement: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      // Note: These endpoints don't exist yet, so we'll show an error
-      // In a real implementation, we'd call: const usersData = await api.getUsers();
-      setError("User management endpoints not implemented in backend");
+      setError(null);
+
+      // Get all users from API
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL || "http://localhost:5000"}/v1/users`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const usersData = await response.json();
+
+      // Map backend user format to frontend User type
+      const mappedUsers: User[] = usersData.map((user: any) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role:
+          user.role === "manager"
+            ? Role.MANAGER
+            : user.role === "admin"
+            ? Role.ADMIN
+            : user.role === "mukhtar"
+            ? Role.MUKTAR
+            : Role.CITIZEN,
+        district: user.neighborhood || user.district,
+        joinedAt: user.createdAt,
+      }));
+
+      // Filter users based on current user's permissions
+      let filteredUsers = mappedUsers;
+
+      if (currentUser?.role === Role.ADMIN) {
+        // Admin can only see and manage mukhtar users
+        filteredUsers = mappedUsers.filter((user) => user.role === Role.MUKTAR);
+      }
+      // Manager can see all users (no filtering needed)
+
+      setUsers(filteredUsers);
     } catch (err) {
       console.error("Failed to fetch users:", err);
-      setError("Failed to load users");
+      setError(
+        "Failed to load users. Please check your connection and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -82,7 +128,7 @@ export const UserManagement: React.FC = () => {
         neighborhood: formData.neighborhood,
       };
 
-      // Only managers can update passwords
+      // Only managers can update passwords, admins cannot edit passwords
       if (currentUser?.role === Role.MANAGER && formData.password) {
         updates.password = formData.password;
       }
@@ -397,10 +443,16 @@ export const UserManagement: React.FC = () => {
                     setFormData({ ...formData, role: e.target.value as Role })
                   }
                 >
-                  <option value={Role.MUKTAR}>Mukhtar</option>
-                  <option value={Role.ADMIN}>Admin</option>
-                  {currentUser?.role === Role.MANAGER && (
-                    <option value={Role.MANAGER}>Manager</option>
+                  {currentUser?.role === Role.ADMIN ? (
+                    // Admin can only create mukhtar users
+                    <option value={Role.MUKTAR}>Mukhtar</option>
+                  ) : (
+                    // Manager can create all user types
+                    <>
+                      <option value={Role.MUKTAR}>Mukhtar</option>
+                      <option value={Role.ADMIN}>Admin</option>
+                      <option value={Role.MANAGER}>Manager</option>
+                    </>
                   )}
                 </select>
               </div>
@@ -483,6 +535,11 @@ export const UserManagement: React.FC = () => {
                       setFormData({ ...formData, password: e.target.value })
                     }
                   />
+                </div>
+              )}
+              {currentUser?.role === Role.ADMIN && (
+                <div className="alert alert-info">
+                  <span>Note: Admins cannot modify user passwords.</span>
                 </div>
               )}
               <div>

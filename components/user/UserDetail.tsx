@@ -34,8 +34,63 @@ export const UserDetail: React.FC = () => {
 
         // Fetch user's complaints if they are a mukhtar
         if (userData.role === Role.MUKTAR) {
-          const complaints = await api.getUserComplaints(id);
-          setUserComplaints(complaints);
+          // Connect to GET /v1/users/:id/complaints endpoint
+          const response = await fetch(
+            `${
+              process.env.REACT_APP_API_URL || "http://localhost:5000"
+            }/v1/users/${id}/complaints`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+            }
+          );
+
+          if (response.ok) {
+            const complaintsData = await response.json();
+            // Map backend complaint format to frontend Complaint type
+            const mappedComplaints: Complaint[] = complaintsData.map(
+              (complaint: any) => ({
+                id: complaint.id,
+                trackingNumber: complaint.trackingTag,
+                district: complaint.neighborhood,
+                category: complaint.complaint_type,
+                importance:
+                  complaint.priority === "high"
+                    ? "High Importance"
+                    : complaint.priority === "mid"
+                    ? "Medium Importance"
+                    : "Low Importance",
+                title: complaint.description.substring(0, 50) + "...",
+                description: complaint.description,
+                status:
+                  complaint.complaint_status === "pending"
+                    ? "Pending"
+                    : complaint.complaint_status === "accepted"
+                    ? "Completed"
+                    : complaint.complaint_status === "refused"
+                    ? "Closed"
+                    : "In Progress",
+                createdAt: complaint.createdAt,
+                phoneNumber: complaint.contactNumber,
+                attachments: [],
+                pinned: false,
+                submitterName: complaint.submitterName,
+                location: complaint.location,
+                citizenHelp: complaint.suggestedSolution || "",
+                solutionInfo: complaint.solutionInfo,
+                refusalReason: complaint.refusalReason,
+                notes: complaint.notes,
+                estimatedReviewTime: complaint.estimatedReviewTime,
+              })
+            );
+            setUserComplaints(mappedComplaints);
+          } else {
+            console.warn("Failed to fetch user complaints from backend");
+            setUserComplaints([]);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch user:", err);
@@ -179,13 +234,13 @@ export const UserDetail: React.FC = () => {
                   <ChartBarIcon className="w-5 h-5" />
                   Performance Statistics
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="stat bg-base-200 rounded-lg p-4">
-                    <div className="stat-title">Total Complaints</div>
+                    <div className="stat-title">Complaints Handled</div>
                     <div className="stat-value text-2xl text-brand-primary">
                       {userComplaints.length}
                     </div>
-                    <div className="stat-desc">Assigned to handle</div>
+                    <div className="stat-desc">Total assigned</div>
                   </div>
                   <div className="stat bg-green-50 rounded-lg p-4">
                     <div className="stat-title">Resolved</div>
@@ -206,6 +261,16 @@ export const UserDetail: React.FC = () => {
                       }
                     </div>
                     <div className="stat-desc">Currently working on</div>
+                  </div>
+                  <div className="stat bg-red-50 rounded-lg p-4">
+                    <div className="stat-title">Closed/Rejected</div>
+                    <div className="stat-value text-2xl text-red-600">
+                      {
+                        userComplaints.filter((c) => c.status === "Closed")
+                          .length
+                      }
+                    </div>
+                    <div className="stat-desc">Closed or rejected</div>
                   </div>
                 </div>
               </div>
